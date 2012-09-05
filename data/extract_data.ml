@@ -69,7 +69,7 @@ let prop_maps ~default prop =                (* computes diet and trie maps. *)
   | l -> `C (cp, v) :: l
   in
   let mlist = ref [] in 
-  let trie = Tmap.create default in
+  let trie = Tmap.create () in
   let add_uchar cp =
     let v = prop cp in
     if v <> default then

@@ -8,17 +8,10 @@
 
 include Defs.Tmap
 
-let create v = Array.make 272 (Array.make 0 (Array.make 0 v))
-let set ~default m cp v = 
-  let i = cp lsr 12 in
-  if Array.length m.(i) = 0 then m.(i) <- Array.make 256 (Array.make 0 default);
-  let j = (cp lsr 4) land 0xFF in 
-  if Array.length m.(i).(j) = 0 then m.(i).(j) <- Array.make 16 default;  
-  m.(i).(j).(cp land 0xF) <- v
-
+let create () = Array.make 272 nil
 let set ~default m cp v =
   let i = cp lsr 12 in
-  if Array.length m.(i) = 0 then m.(i) <- Array.make 256 (Array.make 0 default);
+  if Array.length m.(i) = 0 then m.(i) <- Array.make 256 nil;
   let j = (cp lsr 4) land 0xFF in 
   if Array.length m.(i).(j) = 0 then m.(i).(j) <- Array.make 16 default;  
   m.(i).(j).(cp land 0xF) <- v
