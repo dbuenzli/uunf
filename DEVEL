@@ -1,0 +1,23 @@
+The distribution contains generated data. If you want to contribute
+please hack your way directly via the repository mentioned in the
+`_oasis` file.
+
+For developing, [uucd][1] and a copy of the XML Unicode character
+database are needed.
+
+Let `DBPATH` be the location of the XML Unicode character database. From
+the root directory of the repository type:
+
+    ln -s DBPATH data/ucd.xml
+    ./build data
+
+The result is in `data/data.ml`, it contains the definitions from
+`data/defs.ml` and the data extracted from the Unicode character
+database via the program `data/extract_data.ml`. 
+
+The file `data/data.ml` is ignored by the version control
+system. During the construction of the distribution, the data file is
+generated and its content is directly substituted in `src/uunf.ml`,
+see `unicode_data()` in the `build` script.
+
+[1] http://erratique.ch/software/uucd

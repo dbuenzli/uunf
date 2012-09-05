@@ -1,0 +1,7 @@
+<**/*.{ml,mli}> : annot, debug
+<src> : include
+<test> : include
+<data> : include
+<data/extract_data.{ml,mli,byte,native}> : package(uucd)
+<test/unftrip.{ml,mli,byte,native}> : package(uutf)
+<test/examples.{ml,mli,byte,native}> : package(uutf)

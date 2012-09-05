@@ -1,0 +1,9 @@
+_build
+data/data.ml
+data/ucd.xml
+data/test.txt
+tmp
+*~
+\.\#*
+\#*#
+TODO

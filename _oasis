@@ -1,0 +1,68 @@
+OASISFormat: 0.3
+Name: uunf
+Version: 0.0.1
+Synopsis: Unicode text normalization for OCaml
+Authors: Daniel Bünzli <daniel.buenzli at erratique.ch>
+Copyrights: (c) 2012 Daniel C. Bünzli
+License: BSD3
+Homepage: http://erratique.ch/software/uunf
+Description:
+ Uunf is an OCaml module for normalizing Unicode text. It supports all
+ Unicode [normalization forms][1] and is independent from any IO
+ mechanism or Unicode text data structure. Text can be processed
+ without a complete in-memory representation.
+ .  
+ Uunf is made of a single independent module and distributed under the
+ BSD3 license.
+ .
+ [1]: http://www.unicode.org/reports/tr15/
+OCamlVersion: >= 3.12.0
+Plugins: META (0.3)
+BuildTools:ocamlbuild
+
+Library uunf
+ Path: src
+ Modules: Uunf
+
+Executable unftrip
+ Path: test
+ MainIs: unftrip.ml
+ CompiledObject: Best
+ BuildDepends: uutf, uunf
+
+Executable test
+ Path: test
+ MainIs: test.ml
+ CompiledObject: Best
+ BuildDepends: uunf
+ Install: false
+
+Executable examples
+ Path: test
+ MainIs: examples.ml
+ CompiledObject: Best
+ BuildDepends: uutf, uunf
+ Install: false
+
+Document api
+ Title: Uunf's documentation and API reference
+ Type: ocamlbuild (0.3)
+ BuildTools+: ocamldoc
+ XOCamlbuildLibraries: uunf
+ XOCamlbuildPath: doc
+
+Document distribution
+ Title: "Uunf's README, CHANGES and DEVEL files"
+ DataFiles: README CHANGES DEVEL
+
+Document samples
+ Title: "Uunf's sample code"
+ DataFiles: test/*.ml
+
+Document UnicodeVersion
+ Title: 6.1.0
+
+SourceRepository head
+ Type: git
+ Location: git://erratique.ch/repos/uunf.git
+ Browser: http://erratique.ch/repos/uunf
