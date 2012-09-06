@@ -6,38 +6,39 @@
 
 (* Trie character maps *)
 
-include Defs.Tmap
+include Defs.Tset;;
 
 let create () = Array.make 272 nil
-let set ~default m cp v =
-  if v = default then () else
-  let i = cp lsr 12 in
-  if m.(i) == nil then m.(i) <- Array.make 256 nil;
-  let j = (cp lsr 4) land 0xFF in 
-  if m.(i).(j) == nil then m.(i).(j) <- Array.make 16 default;  
-  m.(i).(j).(cp land 0xF) <- v
+let set ~default m u b =
+  if b = default then () else
+  let sdefault () = String.make 32 (if default then '\xFF' else '\x00') in
+  let i = u lsr 12 in
+  if Array.length m.(i) = 0 then m.(i) <- Array.make 16 snil;
+  let j = u lsr 8 land 0xF in 
+  if String.length m.(i).(j) = 0 then m.(i).(j) <- sdefault ();
+  let bitnum = u land 0xFF in
+  let k = bitnum lsr 3 in
+  let l = bitnum land 7 in
+  let byte = Char.code m.(i).(j).[k] in
+  if b then m.(i).(j).[k] <- Char.chr (byte lor (1 lsl l)) else 
+  m.(i).(j).[k] <- Char.chr (byte land lnot (1 lsl l))
 
-let size v_size  = function 
+let size = function 
 | [||] -> 1
 | a -> 
     let size = ref (1 + Array.length a) in
     for i = 0 to Array.length a - 1 do match a.(i) with
     | [||] -> ()
     | a -> 
-        size := !size + (1 + Array.length a); 
-        for j = 0 to Array.length a - 1 do match a.(j) with
-        | [||] -> ()
-        | a -> 
-            size := !size + (1 + Array.length a); 
-            for k = 0 to Array.length a - 1 do 
-              size := !size + v_size a.(k)
-            done;
+        size := !size + 1 + Array.length a; 
+        for i = 0 to Array.length a - 1 do 
+          size := !size + 1 + ((String.length a.(i) * 8) / Sys.word_size)
         done;
     done;
     !size
 
 let pp = Format.fprintf 
-let dump pr_v ppf = function 
+let dump ppf = function 
 | [||] -> pp ppf "nil"
 | a -> 
     pp ppf "@,[|@,";
@@ -46,11 +47,14 @@ let dump pr_v ppf = function
     | a -> 
         pp ppf "@,[|@,";
         for j = 0 to Array.length a - 1 do match a.(j) with 
-        | [||] -> pp ppf "@,nil;@,"
-        | a -> 
-            pp ppf "@,[|@,";
-            for k = 0 to Array.length a - 1 do pp ppf "@,%a;@," pr_v a.(k) done;
-            pp ppf "|];";
+        | "" -> pp ppf "@,snil;@,"
+        | s -> 
+            pp ppf "@,\"";
+            for k = 0 to String.length s - 1 do 
+              if k mod 16 = 0 && k > 0 then pp ppf "\\@\n ";
+              pp ppf "\\x%02X" (Char.code s.[k])
+            done;
+            pp ppf "\";@,";
         done;
         pp ppf "|];"
     done;

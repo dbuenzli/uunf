@@ -59,6 +59,28 @@ let assert_bool_sets prop p np =
   in
   Uchar.iter assert_cp
 
+let bool_prop_tsets prop = 
+  let p = Tset.create () in 
+  let np = Tset.create () in 
+  let add_uchar u = 
+    let b = prop u in 
+    Tset.set ~default:true p u b; 
+    Tset.set ~default:false np u b;
+  in
+  Uchar.iter add_uchar; 
+  p, np
+ 
+let assert_bool_tsets prop p np = 
+  let assert_cp u = 
+    let b = prop u in 
+    if b <> Tset.find ~default:true p u then 
+    failwith (str "bool trie set failure for %X" u); 
+    if b <> Tset.find ~default:false np u then 
+    failwith (str "bool trie set failure for %X" u)
+  in
+  Uchar.iter assert_cp
+
+
 (* Compact maps from characters to values. *)
 
 let prop_maps ~default prop =                (* computes diet and trie maps. *)
@@ -101,14 +123,20 @@ let pp_boundary nf ucd ppf nf_quick_check =
   | `Maybe | `False -> false
   | `True -> (ucd_get ucd u Uucd.canonical_combining_class "ccc") = 0 
   in
-  let p, np = bool_prop_sets prop in 
+  let p, np = bool_prop_sets prop in
+  let p', np' = bool_prop_tsets prop in
   let p_height, np_height = Dset.height p, Dset.height np in
   let p_size, np_size = Dset.size p, Dset.size np in
+  let p_size', np_size' = Tset.size p', Tset.size np' in
   let neg = p_height > np_height || p_size > np_size in
   let id = str "%s_boundary_%s" nf (if neg then "false" else "true") in
-  log ", asserting data.\n"; assert_bool_sets prop p np;
+  log ", asserting data.\n"; 
+  assert_bool_sets prop p np;
+  assert_bool_tsets prop p' np';
   log " true  set size: %s height: %d\n" (str_of_size p_size) p_height;
   log " false set size: %s height: %d\n" (str_of_size np_size) np_height;
+  log " true  trie set size: %s\n" (str_of_size p_size');
+  log " false trie set size: %s\n" (str_of_size np_size');
   log " Using %s definition.\n\n" (if neg then "false set" else "true set");
   pp ppf "  @[<hov>let %s = %a@]@\n@\n" id Dset.dump (if neg then np else p);
   pp ppf "  @[let %s_boundary cp = %s(Dset.mem %s cp)@]@\n@\n" 
@@ -231,7 +259,7 @@ let pp_primary_composite ppf ucd =
   pp ppf " primary_composite_map cp@\n@\n"
 
 let pp_data_module ppf ucd = 
-  pp ppf "  open Dset;;@\n@\n";
+  pp ppf "  open Tset;;@\n@\n";
   pp_boundary "nfc" ucd ppf Uucd.nfc_quick_check; 
   pp_boundary "nfd" ucd ppf Uucd.nfd_quick_check; 
   pp_boundary "nfkc" ucd ppf Uucd.nfkc_quick_check; 
