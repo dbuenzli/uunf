@@ -20,8 +20,8 @@ let set ~default m u b =
   let k = bitnum lsr 3 in
   let l = bitnum land 7 in
   let byte = Char.code m.(i).(j).[k] in
-  if b then m.(i).(j).[k] <- Char.chr (byte lor (1 lsl l)) else 
-  m.(i).(j).[k] <- Char.chr (byte land lnot (1 lsl l))
+  if b then m.(i).(j).[k] <- Char.unsafe_chr (byte lor (1 lsl l)) else 
+  m.(i).(j).[k] <- Char.unsafe_chr (byte land lnot (1 lsl l))
 
 let size = function 
 | [||] -> 1
