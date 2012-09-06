@@ -36,7 +36,7 @@ module Data = struct
 (* %%UNICODESUPPRESS%% *) let nfkd_boundary u = err ()
 (* %%UNICODESUPPRESS%% *) let ccc u = err ()
 (* %%UNICODESUPPRESS%% *) let decomp u = err () 
-(* %%UNICODESUPPRESS%% *) let primary_composite u = err () 
+(* %%UNICODESUPPRESS%% *) let compose u = err () 
 (* %%UNICODESUPPRESS%% *) include Data
 (* %%UNICODEDATA%% *)
 end
@@ -74,7 +74,7 @@ let _composite u1 u2 =
       if u2 < 0x11A8 || u2 > 0x11C3 then ux_none else 
       (u1 + u2 - H.tbase)                            (* LVT hangul composite *)
     end
-  else match Data.primary_composite u1 with 
+  else match Data.compose u1 with 
   | [||] -> ux_none
   | a (* [u2; c; u2'; c'; ...] sorted *) ->
       let len = Array.length a / 2 in 

@@ -4,26 +4,20 @@
    %%NAME%% release %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-(* Trie character boolean maps *)
+(* Trie character byte maps *)
 
-include Defs.Tbmap;;
+include Defs.Tbytemap;;
 
 let create default = { default; l0 = Array.make l0_size nil }
-let set m u b =
-  let l2_make m = String.make l2_size (if m.default then '\xFF' else '\x00') in
-  if b = m.default then () else
+let set m u byte =
+  let l2_make m = String.make l2_size (Char.chr m.default) in
+  if byte = m.default then () else
   let i = u lsr l0_shift in
   if m.l0.(i) == nil then m.l0.(i) <- Array.make l1_size snil;
   let j = u lsr l1_shift land l1_mask in 
   if m.l0.(i).(j) == snil then m.l0.(i).(j) <- l2_make m;
   let k = u land l2_mask in
-  let byte_num = k lsr 3 (* / 8 *) in
-  let bit_num = k land 7 (* mod 8 *) in
-  let byte = Char.code m.l0.(i).(j).[byte_num] in
-  if b then 
-    m.l0.(i).(j).[byte_num] <- Char.unsafe_chr (byte lor (1 lsl bit_num))
-  else 
-    m.l0.(i).(j).[byte_num] <- Char.unsafe_chr (byte land lnot (1 lsl bit_num))
+  m.l0.(i).(j).[k] <- Char.unsafe_chr byte
 
 let size m = match m.l0 with
 | [||] -> 3 + 1 
@@ -41,7 +35,7 @@ let size m = match m.l0 with
 
 let pp = Format.fprintf 
 let dump ppf m =
-  pp ppf "@,{ default =@ %b;@, l0 =@ " m.default;
+  pp ppf "@,{ default =@ %d;@, l0 =@ " m.default;
   begin match m.l0 with
   | [||] -> pp ppf "nil"
   | l0 -> 
