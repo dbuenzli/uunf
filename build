@@ -76,9 +76,8 @@ project_info ()
 unicode_data ()
 {
     action data;
-    UNICODEDATA=`CAT data/data.ml | $SED "s/$/\\\\\/g;s/&/\\\\\\\&/g;"`
     F=src/$NAME
-    $SED -e "s/^.*%%UNICODEDATA%%.*$/$UNICODEDATA /" \
+    $SED -e "/^.*%%UNICODEDATA%%.*$/r data/data.ml" \
          -e "/%%UNICODESUPPRESS%%/ d" $F.ml > $F.tmp
     $MV -f $F.tmp $F.ml
     $RM -r data
@@ -98,7 +97,7 @@ distrib ()
   unicode_data;
 
   # Remove dev artefacts
-  $RM -R -f TODO .typerex .git .gitignore build _tags myocamlbuild.ml  
+  $RM -R -f TODO .typerex .git .gitignore build _tags myocamlbuild.ml
   action clean
 
   # Generate oasis artefacts
