@@ -4,9 +4,9 @@
    %%NAME%% release %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-(* Trie character maps *)
+(* Trie character boolean maps *)
 
-include Defs.Tset;;
+include Defs.Tbmap;;
 
 let create () = Array.make 272 nil
 let set ~default m u b =

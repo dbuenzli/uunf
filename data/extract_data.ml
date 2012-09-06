@@ -35,40 +35,40 @@ module Uchar = struct
     for cp = max_surrogate + 1 to max do f cp done
 end
 
-(* Sets of characters satisfying a property *)
+(* Compact maps from characters to booleans. *)
 
-let bool_prop_tsets prop = 
-  let p = Tset.create () in 
-  let np = Tset.create () in 
+let bool_prop_maps prop = 
+  let p = Tbmap.create () in 
+  let np = Tbmap.create () in 
   let add_uchar u = 
     let b = prop u in 
-    Tset.set ~default:true p u b; 
-    Tset.set ~default:false np u b;
+    Tbmap.set ~default:true p u b; 
+    Tbmap.set ~default:false np u b;
   in
   Uchar.iter add_uchar; 
   p, np
  
-let assert_bool_tsets prop p np = 
+let assert_bool_prop_maps prop p np = 
   let assert_cp u = 
     let b = prop u in 
-    if b <> Tset.find ~default:true p u then 
-    failwith (str "bool trie set failure for %X" u); 
-    if b <> Tset.find ~default:false np u then 
-    failwith (str "bool trie set failure for %X" u)
+    if b <> Tbmap.get ~default:true p u then 
+    failwith (str "bool prop map failure for U+%04X" u); 
+    if b <> Tbmap.get ~default:false np u then 
+    failwith (str "bool prop map failure for U+%04X" u)
   in
   Uchar.iter assert_cp
 
-(* Compact maps from characters to values. *)
+(* Compact maps from characters to arbitrary values. *)
 
-let prop_map ~default prop =                          (* computes trie map. *)
+let prop_map ~default prop =
   let trie = Tmap.create () in
   let add_uchar cp = Tmap.set ~default trie cp (prop cp) in
   Uchar.iter add_uchar; trie
 
-let assert_map ~default prop tmap = 
+let assert_prop_map ~default prop tmap = 
   let assert_cp cp = 
-    if (prop cp) = Tmap.find ~default tmap cp then () else 
-    failwith (str "trie map failure for U+%04X" cp)
+    if (prop cp) = Tmap.get ~default tmap cp then () else 
+    failwith (str "bool prop map failure for U+%04X" cp)
   in
   Uchar.iter assert_cp
 
@@ -79,23 +79,23 @@ let ucd_get ucd u p pstr = match Uucd.cp_prop ucd u p with
 | Some v -> v
 
 let pp_boundary nf ucd ppf nf_quick_check =
-  log "%s boundary boolean property as trie map character set" nf;
+  log "%s boundary property as character boolean trie map" nf;
   let prop_str = str "%s_quick_check" nf in
   let prop u = match ucd_get ucd u nf_quick_check prop_str with 
   | `Maybe | `False -> false
   | `True -> (ucd_get ucd u Uucd.canonical_combining_class "ccc") = 0 
   in
-  let p, np = bool_prop_tsets prop in
-  let p_size, np_size = Tset.size p, Tset.size np in
+  let p, np = bool_prop_maps prop in
+  let p_size, np_size = Tbmap.size p, Tbmap.size np in
   let neg = p_size > np_size in
   let id = str "%s_boundary_%s" nf (if neg then "false" else "true") in
   log ", asserting data.\n"; 
-  assert_bool_tsets prop p np;
-  log " true  trie set size: %s\n" (str_of_size p_size);
-  log " false trie set size: %s\n" (str_of_size np_size);
-  log " Using %s definition.\n\n" (if neg then "false set" else "true set");
-  pp ppf "  @[<hov>let %s = %a@]@\n@\n" id Tset.dump (if neg then np else p);
-  pp ppf "  @[let %s_boundary u = Tset.find ~default:%s %s u@]@\n@\n" 
+  assert_bool_prop_maps prop p np;
+  log " boolean trie map (default true)  size: %s\n" (str_of_size p_size);
+  log " boolean trie map (default false) size: %s\n" (str_of_size np_size);
+  log " Using default %s definition.\n\n" (if neg then "false" else "true");
+  pp ppf "  @[<hov>let %s = %a@]@\n@\n" id Tbmap.dump (if neg then np else p);
+  pp ppf "  @[let %s_boundary u = Tbmap.get ~default:%s %s u@]@\n@\n" 
     nf (if neg then "false" else "true") id
 
 let pp_ccc ppf ucd = 
@@ -105,10 +105,10 @@ let pp_ccc ppf ucd =
   let tmap = prop_map ~default prop in 
   let t_size = Tmap.size (fun _ -> 0) tmap in 
   let pp_int ppf i = Format.fprintf ppf "%d" i in
-  log ", asserting data.\n"; assert_map ~default prop tmap;
+  log ", asserting data.\n"; assert_prop_map ~default prop tmap;
   log " trie map size: %s\n\n" (str_of_size t_size);
   pp ppf "  @[let ccc_map = %a@]@\n@\n" (Tmap.dump pp_int) tmap; 
-  pp ppf "  let ccc cp = Tmap.find ~default:%d ccc_map cp@\n@\n" default
+  pp ppf "  let ccc cp = Tmap.get ~default:%d ccc_map cp@\n@\n" default
 
 let pp_decomp ppf ucd = 
   log "decomposition as trie map"; 
@@ -138,10 +138,10 @@ let pp_decomp ppf ucd =
       for i = 0 to Array.length a - 1 do pp ppf "@,0x%X;@," a.(i) done;
       pp ppf "@,|]"
   in
-  log ", asserting data.\n"; assert_map ~default prop tmap;
+  log ", asserting data.\n"; assert_prop_map ~default prop tmap;
   log " trie map size: %s\n\n" (str_of_size t_size);
   pp ppf "  @[let decomp_map = %a@]@\n@\n" (Tmap.dump pp_decomp) tmap; 
-  pp ppf "  let decomp cp = Tmap.find ~default:Tmap.nil decomp_map cp@\n@\n";
+  pp ppf "  let decomp cp = Tmap.get ~default:Tmap.nil decomp_map cp@\n@\n";
 
 module Cpmap = Uucd.Cpmap 
 
@@ -189,15 +189,15 @@ let pp_primary_composite ppf ucd =
       for i = 0 to Array.length a - 1 do pp ppf "@,0x%X;@," a.(i) done;
       pp ppf "@,|]"
   in
-  log ", asserting data.\n"; assert_map ~default prop tmap;
+  log ", asserting data.\n"; assert_prop_map ~default prop tmap;
   log " trie map size: %s\n" (str_of_size t_size);
   log " max num. of possible composition for a base char: %d\n\n" !max_comps;
   pp ppf "  @[let primary_composite_map = %a@]@\n@\n" (Tmap.dump pp_d) tmap; 
-  pp ppf "  let primary_composite cp = Tmap.find ~default:Tmap.nil";
+  pp ppf "  let primary_composite cp = Tmap.get ~default:Tmap.nil";
   pp ppf " primary_composite_map cp@\n@\n"
 
 let pp_data_module ppf ucd = 
-  pp ppf "  open Tset;;@\n@\n";
+  pp ppf "  open Tbmap;;@\n@\n";
   pp_boundary "nfc" ucd ppf Uucd.nfc_quick_check; 
   pp_boundary "nfd" ucd ppf Uucd.nfd_quick_check; 
   pp_boundary "nfkc" ucd ppf Uucd.nfkc_quick_check; 

@@ -8,14 +8,14 @@
 
 include Defs.Tmap
 
-let create () = Array.make 272 nil
-let set ~default m cp v =
+let create () = Array.make l0_size nil
+let set ~default m u v =
   if v = default then () else
-  let i = cp lsr 12 in
-  if m.(i) == nil then m.(i) <- Array.make 256 nil;
-  let j = (cp lsr 4) land 0xFF in 
-  if m.(i).(j) == nil then m.(i).(j) <- Array.make 16 default;  
-  m.(i).(j).(cp land 0xF) <- v
+  let i = u lsr l0_shift in
+  if m.(i) == nil then m.(i) <- Array.make l1_size nil;
+  let j = u lsr l1_shift land l1_mask in 
+  if m.(i).(j) == nil then m.(i).(j) <- Array.make l2_size default;  
+  m.(i).(j).(u land l2_mask) <- v
 
 let size v_size  = function 
 | [||] -> 1
