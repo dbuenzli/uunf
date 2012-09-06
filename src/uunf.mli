@@ -109,16 +109,24 @@ val ccc : uchar -> int
     {{:http://www.unicode.org/glossary/#combining_class}canonical combining 
     class} value. *)
 
-val decomp : uchar -> uchar array
+val decomp : uchar -> int array
 (** [decomp u] is [u]'s
     {{:http://www.unicode.org/glossary/#decomposition_mapping}decomposition
     mapping}. If the empty array is returned, [u] decomposes to itself. 
-    The first character in the array must be masked with [0x1FFFFF] as the 
-    bit 24 [(1 lsl 24)] is set if the decomposition is a 
-    {{:http://www.unicode.org/glossary/#compatibility_decomposition}
-    compatibility decomposition}.
+
+    The first number in the array contains additional information, it
+    cannot be used as an {!uchar}. Use {!d_uchar} on the number to get the
+    actual character and {!d_compatibility} to find out if this is
+    a compatibility decomposition. All other characters of the array 
+    are guaranteed to be of type {!uchar}.
 
     {b Warning.} Do {b not} mutate the array. *)
+
+val d_uchar : int -> uchar
+(** See {!decomp}. *)
+
+val d_compatibility : int -> bool
+(** See {!decomp}. *)
 
 val composite : uchar -> uchar -> uchar option
 (** [composite u1 u2] is the 
@@ -133,20 +141,16 @@ val composite : uchar -> uchar -> uchar option
     {{:http://www.unicode.org/glossary/#starter}starter} followed by
     10'000 combining
     {{:http://www.unicode.org/glossary/#nonspacing_mark}non-spacing
-    marks} it will have to bufferize all the marks.
-
-    To avoid this problem (e.g. in a malicious setting), the input can
-    be converted on the fly to
+    marks} it will have to bufferize all the marks (a workaround is
+    to first convert your input to
     {{:http://www.unicode.org/reports/tr15/#Stream_Safe_Text_Format}stream-safe
-    text format}. While this will modify degenerate texts, it will not modify
-    ordinary texts and guarantee bounded memory usage in every case. 
-    See the {{!examples}examples} to see how this can be performed. *)
+    text format}). *)
 
 (** {1:basics Basics} 
 
     A normalizer is a stateful filter that inputs a sequence of
-    characters and outputs an equivalent sequence, in the
-    same order, but in the requested normal form.
+    characters and outputs an equivalent sequence in the requested 
+    normal form.
       
     The function {!create} returns a new normalizer for a given normal
     form:
@@ -198,46 +202,6 @@ let utf_8_normalize nf s =
   in
   Uutf.String.fold_utf_8 add_uchar () s; add `End; Buffer.contents b
 ]}
-
-    {2:safe UTF-8 stream-safe conversion and normalization}
-
-    As mentioned in the {{!limits}limitations} degenerate text can
-    make the normalizer buffer an arbitrary amount of text. To prevent
-    that the input can be converted to
-    {{:http://www.unicode.org/reports/tr15/#Stream_Safe_Text_Format}stream-safe
-    text format}.
-
-    Stream-safe text format modifies only degenerate text by inserting in 
-    the sequence an [U+034F]
-    (combining grapheme joiner,
-    {{:http://www.unicode.org/faq/char_combmark.html#14}FAQ}) after any
-    decomposed sequence of 
-    non-{{:http://www.unicode.org/glossary/#starter}starter}
-    larger than 30.
-
-    Here again we use {!Uutf} to fold over the characters of [s] and to 
-    encode the converted and normalized sequence in a standard OCaml 
-    buffer.
-{[
-let utf_8_safe_normalize nf s = 
-  let b = Buffer.create (String.length s * 3) in 
-  let n = Uunf.create nf in 
-  let rec add v = match Uunf.add n u with
-  | `Uchar u -> Uutf.Buffer.add_utf_8 b u; add `Await
-  | `Await -> () 
-  in
-  let stream_safe_add ns_count u = 
-    let init_ns, trail_ns = failwith "TODO" in
-    if ns_count + init_ns > 30 then (add 0x034F; add u; trail_ns) else 
-    (add u; ns_count + trail_ns)
-  in
-  let add_uchar ns_count _ = function 
-  | `Malformed -> stream_safe_add ns_count (`Uchar Uutf.u_rep) 
-  | `Uchar _ as u -> stream_safe_add ns_count u
-  in
-  Uutf.String.fold_utf_8 add_uchar 0 s; add `End; Buffer.contents b
-]}
-
 *)
 
 (*---------------------------------------------------------------------------

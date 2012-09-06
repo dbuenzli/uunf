@@ -140,20 +140,20 @@ let test_conformance_non_decomposables decomps =
     in
     List.rev (add (add [] (`Uchar u)) `End)
   in
-  let check sv = 
-    if CpSet.mem sv decomps then () else 
+  let check u = 
+    if CpSet.mem u decomps then () else 
     begin
-      let ul = [sv] in
+      let ul = [u] in
       Uunf.reset nc; Uunf.reset nd; Uunf.reset nkc; Uunf.reset nkd;
-      if norm nc sv <> ul then fail "NFC: U+%04X <> toNFC(U+%04X)" sv sv;
-      if norm nd sv <> ul then fail "NFD: U+%04X <> toNFD(U+%04X)" sv sv;
-      if norm nkc sv <> ul then fail "NFKC: U+%04X <> toNFKC(U+%04X)" sv sv;
-      if norm nkd sv <> ul then fail "NFKD: U+%04X <> toNFKD(U+%04X)" sv sv;   
+      if norm nc u <> ul then fail "NFC: U+%04X <> toNFC(U+%04X)" u u;
+      if norm nd u <> ul then fail "NFD: U+%04X <> toNFD(U+%04X)" u u;
+      if norm nkc u <> ul then fail "NFKC: U+%04X <> toNFKC(U+%04X)" u u;
+      if norm nkd u <> ul then fail "NFKD: U+%04X <> toNFKD(U+%04X)" u u;   
     end
   in
   (* For each unicode scalar value *)
-  for sv = 0x0000 to 0xD7FF do check sv done;
-  for sv = 0xE000 to 0x10FFFF do check sv done
+  for u = 0x0000 to 0xD7FF do check u done;
+  for u = 0xE000 to 0x10FFFF do check u done
 
 let test_others () =
   let test src nf dst = 

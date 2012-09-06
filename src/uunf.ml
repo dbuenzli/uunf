@@ -61,7 +61,25 @@ module H = struct            (* Hangul decomposition/composition constants. *)
   let scount = 11172 
 end
 
-let _composite u1 u2 = 
+let decomp u = 
+  if u < 0xAC00 || 0xD7A3 < u then Data.decomp u else
+  begin                                       (* LV or LVT hangul composite *)
+    let sindex = u - H.sbase in 
+    let l = H.lbase + (sindex / H.ncount) in 
+    let v = H.vbase + (sindex mod H.ncount) / H.tcount in 
+    let t = H.tbase + (sindex mod H.tcount) in 
+    if t = H.tbase then [|l; v|] else [|l; v; t|]
+  end
+
+(* N.B. to help stream-safe text implementer we *could* use the bits
+   25-27 of (decomp u).(0) to indicate the number of initial non
+   starters in the NFKD decomposition of the character and bits and
+   28-30 to indicate the non starter count increment. *)
+
+let d_compatibility i = i land (1 lsl 24) > 0
+let d_uchar i = i land 0x1FFFFF
+
+let _composite u1 u2 =
   if 0x1100 <= u1 && u1 <= 0x1112 then 
     begin
       if u2 < 0x1161 || 0x1175 < u2 then ux_none else
@@ -89,16 +107,6 @@ let _composite u1 u2 =
 let composite u1 u2 =
   let u = _composite u1 u2 in 
   if u = ux_none then None else Some u
-
-let decomp u = 
-  if u < 0xAC00 || 0xD7A3 < u then Data.decomp u else
-  begin                                       (* LV or LVT hangul composite *)
-    let sindex = u - H.sbase in 
-    let l = H.lbase + (sindex / H.ncount) in 
-    let v = H.vbase + (sindex mod H.ncount) / H.tcount in 
-    let t = H.tbase + (sindex mod H.tcount) in 
-    if t = H.tbase then [|l; v|] else [|l; v; t|]
-  end
 
 (* Normalize *)
 
@@ -135,7 +143,7 @@ let create form  =
 
 let is_end n = let `Uchar u = n.uc in u = ux_eoi
 let get_u n = let `Uchar u = n.uc in u
-let empty n = n.first > n.last
+let acc_empty n = n.first > n.last
 let form n = n.form
 let copy n = { n with acc = Array.copy n.acc }
 let reset n =
@@ -161,7 +169,7 @@ let ordered_add n u =    (* canonical ordering algorithm via insertion sort. *)
 
 let rec add n u = 
   if 0xAC00 <= u && u <= 0xD7A3 then
-    begin                                      (* LV or LVT hangul composite *)
+    begin (* LV or LVT hangul composite, copied from decomp to avoid alloc. *)
       let sindex = u - H.sbase in 
       let l = H.lbase + (sindex / H.ncount) in 
       let v = H.vbase + (sindex mod H.ncount) / H.tcount in 
@@ -173,11 +181,11 @@ let rec add n u =
     begin match Data.decomp u with
     | [||] -> ordered_add n u
     | d -> 
-        let compat = d.(0) land (1 lsl 24) > 0 in
-        if compat && not n.compat then ordered_add n u else
-        let d0 = d.(0) land 0x1FFFFF in 
-        add n d0;
-        for i = 1 to Array.length d - 1 do add n d.(i) done
+        if d_compatibility d.(0) && not n.compat then ordered_add n u else
+        begin 
+          add n (d_uchar d.(0));
+          for i = 1 to Array.length d - 1 do add n d.(i) done
+        end
     end
 
 let compose n =                         (* canonical composition algorithm. *)
@@ -230,7 +238,7 @@ let add n = function
 | `Await ->
     begin match n.state with
     | Flush -> 
-        if empty n
+        if acc_empty n
         then (n.state <- if is_end n then End else Boundary; `Await)
         else flush_next n
     | Start | End | Boundary | Acc -> `Await
