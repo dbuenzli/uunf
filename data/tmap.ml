@@ -8,53 +8,59 @@
 
 include Defs.Tmap
 
-let create () = Array.make l0_size nil
-let set ~default m u v =
-  if v = default then () else
+let create default = { default; l0 = Array.make l0_size nil }
+let set m u v =
+  if v = m.default then () else
   let i = u lsr l0_shift in
-  if m.(i) == nil then m.(i) <- Array.make l1_size nil;
-  let j = u lsr l1_shift land l1_mask in 
-  if m.(i).(j) == nil then m.(i).(j) <- Array.make l2_size default;  
-  m.(i).(j).(u land l2_mask) <- v
+  if m.l0.(i) == nil then m.l0.(i) <- Array.make l1_size nil;
+  let j = u lsr l1_shift land l1_mask in
+  if m.l0.(i).(j) == nil then m.l0.(i).(j) <- Array.make l2_size m.default;
+  m.l0.(i).(j).(u land l2_mask) <- v
 
-let size v_size  = function 
-| [||] -> 1
-| a -> 
-    let size = ref (1 + Array.length a) in
-    for i = 0 to Array.length a - 1 do match a.(i) with
+let size v_size m = match m.l0 with 
+| [||] -> 3 + 1 + v_size m.default
+| l0 -> 
+    let size = ref (3 + v_size m.default + 1 + Array.length l0) in
+    for i = 0 to Array.length l0 - 1 do match l0.(i) with
     | [||] -> ()
-    | a -> 
-        size := !size + (1 + Array.length a); 
-        for j = 0 to Array.length a - 1 do match a.(j) with
+    | l1 -> 
+        size := !size + (1 + Array.length l1); 
+        for j = 0 to Array.length l1 - 1 do match l1.(j) with
         | [||] -> ()
-        | a -> 
-            size := !size + (1 + Array.length a); 
-            for k = 0 to Array.length a - 1 do 
-              size := !size + v_size a.(k)
+        | l2 -> 
+            size := !size + (1 + Array.length l2); 
+            for k = 0 to Array.length l2 - 1 do 
+              size := !size + v_size l2.(k)
             done;
         done;
     done;
     !size
 
 let pp = Format.fprintf 
-let dump pr_v ppf = function 
-| [||] -> pp ppf "nil"
-| a -> 
-    pp ppf "@,[|@,";
-    for i = 0 to Array.length a - 1 do match a.(i) with 
-    | [||] -> pp ppf "@,nil;@," 
-    | a -> 
-        pp ppf "@,[|@,";
-        for j = 0 to Array.length a - 1 do match a.(j) with 
-        | [||] -> pp ppf "@,nil;@,"
-        | a -> 
-            pp ppf "@,[|@,";
-            for k = 0 to Array.length a - 1 do pp ppf "@,%a;@," pr_v a.(k) done;
-            pp ppf "|];";
-        done;
-        pp ppf "|];"
-    done;
-    pp ppf "|]"
+let dump pr_v ppf m = 
+  pp ppf "@,{ default =@ %a;@, l0 =@ " pr_v m.default;
+  begin match m.l0 with
+  | [||] -> pp ppf "nil"
+  | l0 -> 
+      pp ppf "@,[|@,";
+      for i = 0 to Array.length l0 - 1 do match l0.(i) with 
+      | [||] -> pp ppf "@,nil;@," 
+      | l1 -> 
+          pp ppf "@,[|@,";
+          for j = 0 to Array.length l1 - 1 do match l1.(j) with 
+          | [||] -> pp ppf "@,nil;@,"
+          | l2 -> 
+              pp ppf "@,[|@,";
+              for k = 0 to Array.length l2 - 1 do 
+                pp ppf "@,%a;@," pr_v l2.(k) 
+              done;
+              pp ppf "|];";
+          done;
+          pp ppf "|];"
+      done;
+      pp ppf "|]"
+  end;
+  pp ppf "@,}"
 
 (*---------------------------------------------------------------------------
    Copyright %%COPYRIGHT%%

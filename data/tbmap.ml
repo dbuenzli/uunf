@@ -8,57 +8,63 @@
 
 include Defs.Tbmap;;
 
-let create () = Array.make 272 nil
-let set ~default m u b =
-  if b = default then () else
-  let sdefault () = String.make 32 (if default then '\xFF' else '\x00') in
-  let i = u lsr 12 in
-  if Array.length m.(i) = 0 then m.(i) <- Array.make 16 snil;
-  let j = u lsr 8 land 0xF in 
-  if String.length m.(i).(j) = 0 then m.(i).(j) <- sdefault ();
-  let bitnum = u land 0xFF in
-  let k = bitnum lsr 3 in
-  let l = bitnum land 7 in
-  let byte = Char.code m.(i).(j).[k] in
-  if b then m.(i).(j).[k] <- Char.unsafe_chr (byte lor (1 lsl l)) else 
-  m.(i).(j).[k] <- Char.unsafe_chr (byte land lnot (1 lsl l))
+let create default = { default; l0 = Array.make l0_size nil }
+let set m u b =
+  let l2_make m = String.make l2_size (if m.default then '\xFF' else '\x00') in
+  if b = m.default then () else
+  let i = u lsr l0_shift in
+  if m.l0.(i) == nil then m.l0.(i) <- Array.make l1_size snil;
+  let j = u lsr l1_shift land l1_mask in 
+  if m.l0.(i).(j) == snil then m.l0.(i).(j) <- l2_make m;
+  let k = u land l2_mask in
+  let byte_num = k lsr 3 (* / 8 *) in
+  let bit_num = k land 7 (* mod 8 *) in
+  let byte = Char.code m.l0.(i).(j).[byte_num] in
+  if b then 
+    m.l0.(i).(j).[byte_num] <- Char.unsafe_chr (byte lor (1 lsl bit_num))
+  else 
+    m.l0.(i).(j).[byte_num] <- Char.unsafe_chr (byte land lnot (1 lsl bit_num))
 
-let size = function 
-| [||] -> 1
-| a -> 
-    let size = ref (1 + Array.length a) in
-    for i = 0 to Array.length a - 1 do match a.(i) with
+let size m = match m.l0 with
+| [||] -> 3 + 1 
+| l0 -> 
+    let size = ref (3 + 1 + Array.length l0) in
+    for i = 0 to Array.length l0 - 1 do match l0.(i) with
     | [||] -> ()
-    | a -> 
-        size := !size + 1 + Array.length a; 
-        for i = 0 to Array.length a - 1 do 
-          size := !size + 1 + ((String.length a.(i) * 8) / Sys.word_size)
+    | l1 -> 
+        size := !size + 1 + Array.length l1; 
+        for j = 0 to Array.length l1 - 1 do 
+          size := !size + 1 + ((String.length l1.(j) * 8) / Sys.word_size)
         done;
     done;
     !size
 
 let pp = Format.fprintf 
-let dump ppf = function 
-| [||] -> pp ppf "nil"
-| a -> 
-    pp ppf "@,[|@,";
-    for i = 0 to Array.length a - 1 do match a.(i) with 
-    | [||] -> pp ppf "@,nil;@," 
-    | a -> 
-        pp ppf "@,[|@,";
-        for j = 0 to Array.length a - 1 do match a.(j) with 
-        | "" -> pp ppf "@,snil;@,"
-        | s -> 
-            pp ppf "@,\"";
-            for k = 0 to String.length s - 1 do 
-              if k mod 16 = 0 && k > 0 then pp ppf "\\@\n ";
-              pp ppf "\\x%02X" (Char.code s.[k])
-            done;
-            pp ppf "\";@,";
-        done;
-        pp ppf "|];"
-    done;
-    pp ppf "|]"
+let dump ppf m =
+  pp ppf "@,{ default =@ %b;@, l0 =@ " m.default;
+  begin match m.l0 with
+  | [||] -> pp ppf "nil"
+  | l0 -> 
+      pp ppf "@,[|@,";
+      for i = 0 to Array.length l0 - 1 do match l0.(i) with 
+      | [||] -> pp ppf "@,nil;@," 
+      | l1 -> 
+          pp ppf "@,[|@,";
+          for j = 0 to Array.length l1 - 1 do match l1.(j) with 
+          | "" -> pp ppf "@,snil;@,"
+          | l2 -> 
+              pp ppf "@,\"";
+              for k = 0 to String.length l2 - 1 do 
+                if k mod 16 = 0 && k > 0 then pp ppf "\\@\n ";
+                pp ppf "\\x%02X" (Char.code l2.[k])
+              done;
+              pp ppf "\";@,";
+          done;
+          pp ppf "|];"
+      done;
+      pp ppf "|]"
+  end;
+  pp ppf "@,}"
 
 (*---------------------------------------------------------------------------
    Copyright %%COPYRIGHT%%
