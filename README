@@ -16,6 +16,9 @@ To install %%MODNAME%% you need at least :
 
     OCaml %%OCAMLVERSION%% %%PPDEPS%%
 
+Note that `uutf` is needed only if you install via `findlib`, it is
+only used by the sample programs.
+
 If you have `findlib`, it can be installed by typing :
 
     ocaml setup.ml -configure

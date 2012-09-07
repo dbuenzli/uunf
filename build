@@ -41,7 +41,7 @@ action ()
       ;;
     test)
       ocb test.native
-      ./test.native test/test.txt
+      ./test.native data/test.txt
       ;;
     clean)
       ocb -clean
@@ -67,7 +67,7 @@ project_info ()
   COPYRIGHT=`$OASISQ Copyrights`
   OCAMLVERSION=`$OASISQ OCamlVersion`
   UNICODEVERSION=`$OASISQ Doc\(UnicodeVersion\).Title`
-  DEPS=`$OASISQ "Library(\"$NAME\").BuildDepends"`
+  DEPS="uutf" # only for sample programs
   if [ "$DEPS" ]; then
   PPDEPS=`$ECHO ", $DEPS"| $SED "s|,|,   |g" | $TR "," "\n" | $SED "s|$|\\\\\|"`
   fi;
