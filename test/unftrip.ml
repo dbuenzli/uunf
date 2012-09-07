@@ -149,7 +149,7 @@ let main () =
     "-dump", Arg.Set dump, 
     " Dump normalized scalar values in ASCII, one per line";
     "-enc", Arg.String ienc_fun,
-    "<enc> Input encoding: UTF-8, UTF-16, UTF-16BE, UTF-16LE, ASCII or latin1";
+    "<enc> Input encoding: UTF-8, UTF-16, UTF-16BE, UTF-16LE, ASCII, latin1";
     "-nf", Arg.String nf_fun, 
     "<nf> Normal form: NFC, NFD, NFKC, NFKD or none (no normalization)";
     "-r", Arg.Unit (set_cmd `Random), " Generate random characters.";
