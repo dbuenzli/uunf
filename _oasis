@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name: uunf
-Version: 0.0.1
+Version: 0.9.0
 Synopsis: Unicode text normalization for OCaml
 Authors: Daniel Bünzli <daniel.buenzli at erratique.ch>
 Copyrights: (c) 2012 Daniel C. Bünzli

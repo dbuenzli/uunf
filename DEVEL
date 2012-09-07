@@ -2,13 +2,11 @@ The distribution contains generated data. If you want to contribute
 please hack your way directly via the repository mentioned in the
 `_oasis` file.
 
-For developing, [uucd][1] and a copy of the XML Unicode character
-database are needed.
+For developing, you will need to install [uucd][1] and download a copy
+of XML Unicode character database to $DBPATH. From the root directory
+of the repository type:
 
-Let `DBPATH` be the location of the XML Unicode character database. From
-the root directory of the repository type:
-
-    ln -s DBPATH data/ucd.xml
+    ln -s $DBPATH data/ucd.xml
     ./build data
 
 The result is in `data/data.ml`, it contains the definitions from
@@ -19,5 +17,13 @@ The file `data/data.ml` is ignored by the version control
 system. During the construction of the distribution, the data file is
 generated and its content is directly substituted in `src/uunf.ml`,
 see `unicode_data()` in the `build` script.
+
+For the `./build test` target to work download the
+`NormalizationTest.txt` file from the Unicode character database to
+$TESTPATH and from the root directory of the repository type:
+
+    ln -s $TESTPATH data/test.txt
+    ./build test
+
 
 [1] http://erratique.ch/software/uucd

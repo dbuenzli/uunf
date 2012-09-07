@@ -7,13 +7,13 @@
 let invalid_add () = invalid_arg "expected `Await add"
 
 (* The normalization process is implemented as described in UAX #15
-   section 9.1 for normalizing the concatenation of normalized strings
-   We detect ranges of characters in the input sequence enclosed
-   between two characters for which NFX_quick_check=YES *and* ccc = 0
-   (in 6.1.0 it is claimed that quick_check=YES implies ccc = 0, it's
-   wrong, we therefore call this property nfx_boundary).  Only these
-   ranges (including the left boundary) need to be bufferized to
-   perform the normalization process. *)
+   section 9.1 for normalizing the concatenation of normalized
+   strings.  We detect ranges of characters in the input sequence
+   enclosed between two characters for which NFX_quick_check=YES *and*
+   ccc = 0 (6.1.0 wrongly claims that quick_check=YES implies ccc = 0,
+   we therefore call this property nfx_boundary).  Only these ranges
+   (including the left boundary) need to be bufferized to perform the
+   normalization process. *)
 
 (* Characters *)
 
@@ -48,7 +48,7 @@ let nfkc_boundary u = Data.nfkc_boundary u
 let nfkd_boundary u = Data.nfkd_boundary u
 let ccc = Data.ccc
 
-module H = struct            (* Hangul decomposition/composition constants. *)
+module H = struct                            (* Hangul arithmetic constants. *)
   let sbase = 0xAC00
   let lbase = 0x1100
   let vbase = 0x1161 
@@ -63,7 +63,7 @@ end
 
 let decomp u = 
   if u < 0xAC00 || 0xD7A3 < u then Data.decomp u else
-  begin                                       (* LV or LVT hangul composite *)
+  begin                                        (* LV or LVT hangul composite *)
     let sindex = u - H.sbase in 
     let l = H.lbase + (sindex / H.ncount) in 
     let v = H.vbase + (sindex mod H.ncount) / H.tcount in 
@@ -71,10 +71,10 @@ let decomp u =
     if t = H.tbase then [|l; v|] else [|l; v; t|]
   end
 
-(* N.B. to help stream-safe text implementer we *could* use the bits
-   25-27 of (decomp u).(0) to indicate the number of initial non
-   starters in the NFKD decomposition of the character and bits and
-   28-30 to indicate the non starter count increment. *)
+(* N.B. to help stream-safe text implementers we *could* use the bits
+   25-27 of [(decomp u).(0)] to indicate the number of initial non
+   starters in the NFKD decomposition of [u] and bits and 28-30 to
+   indicate the non starter count increment. *)
 
 let d_compatibility i = i land (1 lsl 24) > 0
 let d_uchar i = i land 0x1FFFFF

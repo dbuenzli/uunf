@@ -41,7 +41,7 @@ action ()
       ;;
     test)
       ocb test.native
-      ./test.native data/test.txt
+      ./test.native test/test.txt
       ;;
     clean)
       ocb -clean
@@ -97,7 +97,7 @@ distrib ()
   unicode_data;
 
   # Remove dev artefacts
-  $RM -R -f TODO .typerex .git .gitignore build _tags myocamlbuild.ml
+  $RM -R -f TODO .typerex .git .gitignore build _tags myocamlbuild.ml  
   action clean
 
   # Generate oasis artefacts

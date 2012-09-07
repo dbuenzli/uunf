@@ -4,7 +4,7 @@
    %%NAME%% release %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-(** Unicode text normalization
+(** Unicode text normalization.
 
     [Uunf] normalizes Unicode text.  It supports all Unicode
     normalization forms and is independent from any IO mechanism or
@@ -75,7 +75,7 @@ val add : t -> [ `Uchar of uchar | `Await | `End ] ->
 
     For [v] use [`Uchar u] to add a new character to the sequence
     to normalize and [`End] to signal the end of sequence. After
-    adding one of these two values always call [add] with [`Await] 
+    adding one of these two values, always call [add] with [`Await] 
     until [`Await] is returned.
 
     {b Raises.} [Invalid_argument] if [`Uchar ] or [`End] is 
