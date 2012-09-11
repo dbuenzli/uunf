@@ -12,7 +12,7 @@
     let l2_mask = 0xF
     let l2_size = 16  (* 0xF + 1 *)
     let get m u = 
-      let l1 = Array.unsafe_get m.l0 (u lsr l0_shift) in
+      let l1 = Array.get m.l0 (u lsr l0_shift) in
       if l1 == nil then m.default else
       let l2 = Array.unsafe_get l1 (u lsr l1_shift land l1_mask) in 
       if l2 == nil then m.default else 
@@ -34,7 +34,7 @@
     let l2_mask = 0xFF
     let l2_size = 32 (* 0xFF + 1 / 8 *)
     let get m u = 
-      let l1 = Array.unsafe_get m.l0 (u lsr l0_shift) in 
+      let l1 = Array.get m.l0 (u lsr l0_shift) in 
       if l1 == nil then m.default else
       let l2 = Array.unsafe_get l1 (u lsr l1_shift land l1_mask) in 
       if l2 == snil then m.default else 
@@ -60,7 +60,7 @@
     let l2_mask = 0xFF
     let l2_size = 256 (* 0xFF + 1 *)
     let get m u = 
-      let l1 = Array.unsafe_get m.l0 (u lsr l0_shift) in 
+      let l1 = Array.get m.l0 (u lsr l0_shift) in 
       if l1 == nil then m.default else
       let l2 = Array.unsafe_get l1 (u lsr l1_shift land l1_mask) in 
       if l2 == snil then m.default else 
