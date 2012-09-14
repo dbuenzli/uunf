@@ -7,8 +7,8 @@
 (** Unicode text normalization.
 
     [Uunf] normalizes Unicode text.  It supports all Unicode
-    normalization forms and is independent from any IO mechanism or
-    Unicode text data structure.  Text can be processed without a
+    normalization forms. The module is independent from any IO mechanism or
+    Unicode text data structure and it can process text without a
     complete in-memory representation of the data.
 
     Consult the {{!basics}basics}, {{!limits}limitations} and
@@ -28,13 +28,13 @@
 
 type uchar = int
 (** The type for Unicode characters. A value of this type {b must}
-    be a Unicode
+    be an Unicode
     {{:http://www.unicode.org/glossary/#unicode_scalar_value} scalar value} 
     which is an integer value in the ranges [0x0000]...[0xD7FF] 
     and [0xE000]...[0x10FFFF]. *)
 
 val is_scalar_value : int -> bool
-(** [is_scalar_value n] is [true] iff [n] is a Unicode 
+(** [is_scalar_value n] is [true] iff [n] is an Unicode 
     {{:http://www.unicode.org/glossary/#Unicode_scalar_value}scalar value}. *)
 
 (** {1 Normalize} *)
@@ -58,7 +58,7 @@ type t
 (** The type for Unicode text normalizers. *)
 
 val create : [< form ] -> t
-(** [create nf] is a Unicode text normalizer for the normal form [nf]. *)
+(** [create nf] is an Unicode text normalizer for the normal form [nf]. *)
 
 val form : t -> form
 (** [form n] is the normalization form of [n]. *)
@@ -185,7 +185,7 @@ let e_acute_nfd = List.rev (add (add [] (`Uchar 0x00E9)) `End)
     {2:utf8 UTF-8 normalization}
 
     [utf_8_normalize nf s] is the UTF-8 encoded normal form [nf] of
-    the UTF-8 encoded string [s]. This examples uses {!Uutf} to fold
+    the UTF-8 encoded string [s]. This example uses {!Uutf} to fold
     over the characters of [s] and to encode the normalized
     sequence in a standard OCaml buffer.
 {[
