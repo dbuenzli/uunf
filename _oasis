@@ -60,7 +60,7 @@ Document samples
  DataFiles: test/*.ml
 
 Document UnicodeVersion
- Title: 6.1.0
+ Title: 6.2.0
 
 SourceRepository head
  Type: git
