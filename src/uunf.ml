@@ -21,7 +21,8 @@ type uchar = int
 let ux_eoi = max_int                 (* end of input, outside unicode range. *)
 let ux_soi = ux_eoi - 1            (* start of input, outside unicode range. *)
 let ux_none = ux_soi - 2                  (* no char, outside unicode range. *)
-let is_scalar_value i = 0x0 <= i && i <= 0xD7FF && 0xE000 <= i && i <= 0x10FFFF
+let is_scalar_value i = 
+  (0x0000 <= i && i <= 0xD7FF) || (0xE000 <= i && i <= 0x10FFFF)
 
 (* Normalization properties. *)
 
