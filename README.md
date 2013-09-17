@@ -13,7 +13,7 @@ BSD3 license.
 [1]: http://www.unicode.org/reports/tr15/
 
 Home page: http://erratique.ch/software/uunf  
-Contact: Daniel Bünzli <daniel.buenzl i@erratique.ch>
+Contact: Daniel Bünzli `<daniel.buenzl i@erratique.ch>`
 
 
 ## Installation

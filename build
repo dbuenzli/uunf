@@ -10,14 +10,15 @@ OCAMLBUILD=${OCAMLBUILD:="ocamlbuild -tag debug -classic-display \
 action () 
 {
     case $1 in
-        default) $OCAMLBUILD uunf.cmx ;;
-        tests)   $OCAMLBUILD test/tests.otarget ;;
-        test)    $OCAMLBUILD test.native; ./test.native data/test.txt ;;
-        doc)     shift; pkg-doc $* doc/api.docdir ;;
-        data)    data ;;
-        clean)   $OCAMLBUILD -clean
-                 rm data/data.ml ;;
-        *)       $OCAMLBUILD $* ;;
+        default)   $OCAMLBUILD uunf.cmx ;;
+        tests)     $OCAMLBUILD test/tests.otarget ;;
+        test)      $OCAMLBUILD test.native; ./test.native data/test.txt ;;
+        doc)       shift; pkg-doc $* doc/api.docdir ;;
+        data)      data ;;
+        substdata) substdata ;;
+        clean)     $OCAMLBUILD -clean
+                   rm data/data.ml ;;
+        *)         $OCAMLBUILD $* ;;
     esac
 }
 
@@ -26,6 +27,15 @@ data ()
     $OCAMLBUILD extract_data.native
     _build/data/extract_data.native data/ucd.xml | \
     cat data/defs.ml - > data/data.ml
+}
+
+substdata ()
+{
+    F=src/uunf
+    sed -e "/^.*%%UNICODEDATA%%.*$/r data/data.ml" \
+        -e "/%%UNICODESUPPRESS%%/ d" $F.ml > $F.tmp
+    mv -f $F.tmp $F.ml
+    rm -r data
 }
 
 if [ $# -eq 0 ]; 

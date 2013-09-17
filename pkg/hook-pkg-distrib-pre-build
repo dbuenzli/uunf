@@ -4,12 +4,6 @@ set -e
 
 # Copies from original repo into cloned repo
 cp -R $ORIGINALREPO/data/ucd.xml $ORIGINALREPO/data/test.txt data
+
 ./build data
-
-F=src/$NAME
-sed -e "/^.*%%UNICODEDATA%%.*$/r data/data.ml" \
-    -e "/%%UNICODESUPPRESS%%/ d" $F.ml > $F.tmp
-mv -f $F.tmp $F.ml
-rm -r data
-
-
+./build substdata
