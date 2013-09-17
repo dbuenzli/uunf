@@ -14,7 +14,7 @@ action ()
         tests)   $OCAMLBUILD test/tests.otarget ;;
         test)    $OCAMLBUILD test.native; ./test.native data/test.txt ;;
         doc)     shift; pkg-doc $* doc/api.docdir ;;
-        data)    pkg/build-data ;;
+        data)    data ;;
         clean)   $OCAMLBUILD -clean
                  rm data/data.ml ;;
         *)       $OCAMLBUILD $* ;;

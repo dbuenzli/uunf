@@ -8,6 +8,7 @@ LOC=`dirname $0`
 . $LOC/pkg-builder
 
 NATIVE=$1
+UUTF=$2
 
 add lib pkg/META                
 add lib src/uunf.mli      
@@ -23,7 +24,7 @@ add doc CHANGES.md
 add doc DEVEL.md
 
 if [ "$UUTF" != "false" ]; then 
-    add bin test/uuftrip
+    add bin test/unftrip
 fi
 
 build

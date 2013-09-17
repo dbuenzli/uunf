@@ -9,13 +9,14 @@ directory of the repository type:
     ./build data
 
 The result is in `data/data.ml`, it contains the definitions from
-`data/defs.ml` and the data extracted from the Unicode character
-database via the program `data/extract_data.ml`. 
+[`data/defs.ml`](data/defs.ml) and the data extracted from the Unicode
+character database via the program
+[`data/extract_data.ml`](data/extract_data.ml).
 
-The file `data/data.ml` is ignored by the version control
-system. During the construction of the distribution by the script
-`pkg-distrib`, the data file is generated and its content is directly
-substituted in `src/uunf.ml`, see the script
+The file `data/data.ml` is ignored by git. During the construction of
+the distribution by the script `pkg-distrib`, the data file is
+generated and its content is directly substituted in `src/uunf.ml`,
+see the script
 [`pkg/hook-pkg-distrib-pre-build`](`pkg/hook-pkg-distrib-pre-build`).
 
 For the `./build test` target to work download the
