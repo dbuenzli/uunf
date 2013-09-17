@@ -1,10 +1,9 @@
 The distribution contains generated data. If you want to contribute
-please hack your way directly via the repository mentioned in the
-`_oasis` file.
+please hack your way directly via the source repository.
 
 For developing, you will need to install [uucd][1] and download a copy
-of XML Unicode character database to $DBPATH. From the root directory
-of the repository type:
+of the XML Unicode character database to $DBPATH. From the root
+directory of the repository type:
 
     ln -s $DBPATH data/ucd.xml
     ./build data
@@ -14,9 +13,10 @@ The result is in `data/data.ml`, it contains the definitions from
 database via the program `data/extract_data.ml`. 
 
 The file `data/data.ml` is ignored by the version control
-system. During the construction of the distribution, the data file is
-generated and its content is directly substituted in `src/uunf.ml`,
-see `unicode_data()` in the `build` script.
+system. During the construction of the distribution by the script
+`pkg-distrib`, the data file is generated and its content is directly
+substituted in `src/uunf.ml`, see the script
+[`pkg/hook-pkg-distrib-pre-build`](`pkg/hook-pkg-distrib-pre-build`).
 
 For the `./build test` target to work download the
 `NormalizationTest.txt` file from the Unicode character database to

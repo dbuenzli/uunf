@@ -1,0 +1,11 @@
+#!/bin/sh
+
+./build data
+
+F=src/$NAME
+$SED -e "/^.*%%UNICODEDATA%%.*$/r data/data.ml" \
+     -e "/%%UNICODESUPPRESS%%/ d" $F.ml > $F.tmp
+$MV -f $F.tmp $F.ml
+$RM -r data
+
+

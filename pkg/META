@@ -1,0 +1,8 @@
+version = "%%VERSION%%"
+description = "Unicode text normalization for OCaml"
+archive(byte) = "uunf.cma"
+archive(byte, plugin) = "uunf.cma"
+archive(native) = "uunf.cmxa"
+archive(native, plugin) = "uunf.cmxs"
+exists_if = "uunf.cma"
+
