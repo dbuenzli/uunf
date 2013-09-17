@@ -1,5 +1,5 @@
 (*---------------------------------------------------------------------------
-   Copyright %%COPYRIGHT%%. All rights reserved.
+   Copyright 2012. All rights reserved.
    Distributed under the BSD3 license, see license at the end of the file.
    %%NAME%% version %%VERSION%%
   ---------------------------------------------------------------------------*)
@@ -220,7 +220,7 @@ let main () =
 let () = if (not !Sys.interactive) then main ()
 
 (*---------------------------------------------------------------------------
-   Copyright %%COPYRIGHT%%
+   Copyright 2012
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
