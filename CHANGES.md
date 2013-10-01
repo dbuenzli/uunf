@@ -1,3 +1,9 @@
+v0.9.2 2013-10-01 Lausanne
+--------------------------
+
+- Updated for Unicode 6.3.0
+- OPAM friendly workflow and drop OASIS support.
+
 v0.9.1 2013-01-04 La Forclaz (VS)
 ---------------------------------
 
