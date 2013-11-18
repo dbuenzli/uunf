@@ -23,7 +23,10 @@
     (latest version)}
     {- Mark Davis. 
     {e {{:http://www.unicode.org/reports/tr15/}UAX #15 Unicode Normalization 
-    Forms}}. (latest version)}} *)
+    Forms}}. (latest version)}
+    {- The Unicode Consortium. 
+    {e {{:http://www.unicode.org/charts/normalization/}Normalization charts}.
+    }}} *)
 
 (** {1 Characters} *)
 
