@@ -11,7 +11,8 @@ NATIVE=$1
 UUTF=$2
 
 add lib pkg/META                
-add lib src/uunf.mli      
+add lib src/uunf.mli
+add lib src/uunf.cmti
 add lib src/uunf.cmi
 add lib src/uunf.cmx
 add lib src/uunf.cma
