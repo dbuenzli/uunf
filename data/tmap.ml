@@ -17,42 +17,42 @@ let set m u v =
   if m.l0.(i).(j) == nil then m.l0.(i).(j) <- Array.make l2_size m.default;
   m.l0.(i).(j).(u land l2_mask) <- v
 
-let size v_size m = match m.l0 with 
+let size v_size m = match m.l0 with
 | [||] -> 3 + 1 + v_size m.default
-| l0 -> 
+| l0 ->
     let size = ref (3 + v_size m.default + 1 + Array.length l0) in
     for i = 0 to Array.length l0 - 1 do match l0.(i) with
     | [||] -> ()
-    | l1 -> 
-        size := !size + (1 + Array.length l1); 
+    | l1 ->
+        size := !size + (1 + Array.length l1);
         for j = 0 to Array.length l1 - 1 do match l1.(j) with
         | [||] -> ()
-        | l2 -> 
-            size := !size + (1 + Array.length l2); 
-            for k = 0 to Array.length l2 - 1 do 
+        | l2 ->
+            size := !size + (1 + Array.length l2);
+            for k = 0 to Array.length l2 - 1 do
               size := !size + v_size l2.(k)
             done;
         done;
     done;
     !size
 
-let pp = Format.fprintf 
-let dump pr_v ppf m = 
+let pp = Format.fprintf
+let dump pr_v ppf m =
   pp ppf "@,{ default =@ %a;@, l0 =@ " pr_v m.default;
   begin match m.l0 with
   | [||] -> pp ppf "nil"
-  | l0 -> 
+  | l0 ->
       pp ppf "@,[|@,";
-      for i = 0 to Array.length l0 - 1 do match l0.(i) with 
-      | [||] -> pp ppf "@,nil;@," 
-      | l1 -> 
+      for i = 0 to Array.length l0 - 1 do match l0.(i) with
+      | [||] -> pp ppf "@,nil;@,"
+      | l1 ->
           pp ppf "@,[|@,";
-          for j = 0 to Array.length l1 - 1 do match l1.(j) with 
+          for j = 0 to Array.length l1 - 1 do match l1.(j) with
           | [||] -> pp ppf "@,nil;@,"
-          | l2 -> 
+          | l2 ->
               pp ppf "@,[|@,";
-              for k = 0 to Array.length l2 - 1 do 
-                pp ppf "@,%a;@," pr_v l2.(k) 
+              for k = 0 to Array.length l2 - 1 do
+                pp ppf "@,%a;@," pr_v l2.(k)
               done;
               pp ppf "|];";
           done;
@@ -69,7 +69,7 @@ let dump pr_v ppf m =
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-     
+
    1. Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
 
