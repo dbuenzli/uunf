@@ -4,7 +4,17 @@
    %%NAME%% release %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-let invalid_add () = invalid_arg "expected `Await add"
+type ret = [ `Uchar of int | `End | `Await ]
+let pp_ret ppf v = match (v :> ret) with
+| `Uchar u -> Format.fprintf ppf "`Uchar %04X" u
+| `End -> Format.fprintf ppf "`End"
+| `Await -> Format.fprintf ppf "`Await"
+
+let err_exp_await add =
+  invalid_arg (Format.asprintf "can't add %a, expected `Await" pp_ret add)
+
+let err_ended add =
+  invalid_arg (Format.asprintf "can't add %a, `End already added" pp_ret add)
 
 (* The normalization process is implemented as described in UAX #15
    section 9.1 for normalizing the concatenation of normalized
@@ -110,12 +120,6 @@ let composite u1 u2 =
   if u = ux_none then None else Some u
 
 (* Normalize *)
-
-type ret = [ `Uchar of uchar | `End | `Await ]
-let pp_ret ppf v = match (v :> ret) with
-| `Uchar u -> Format.fprintf ppf "`Uchar %04X" u
-| `End -> Format.fprintf ppf "`End"
-| `Await -> Format.fprintf ppf "`Await"
 
 type form = [ `NFC | `NFD | `NFKC | `NFKD ]
 type state =                                            (* normalizer state. *)
@@ -239,7 +243,8 @@ let add n = function
         if n.boundary u
         then (n.state <- Boundary; n.uc <- uc; `Await)
         else (n.state <- Acc; add n u; `Await)
-    | End | Flush -> invalid_add ()
+    | Flush -> err_exp_await uc
+    | End -> err_ended uc
     end
 | `Await ->
     begin match n.state with
@@ -255,8 +260,8 @@ let add n = function
     | Boundary -> n.state <- End; (n.uc :> ret)
     | Acc -> n.state <- Flush; n.uc <- `Uchar ux_eoi; flush_start n
     | Start -> n.state <- End; `End
-    | End -> `End
-    | Flush -> invalid_add ()
+    | Flush -> err_exp_await `End
+    | End -> err_ended `End
     end
 
 (*---------------------------------------------------------------------------
