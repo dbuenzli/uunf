@@ -61,14 +61,16 @@ type form = [ `NFD | `NFC | `NFKD | `NFKC ]
 type t
 (** The type for Unicode text normalizers. *)
 
+type ret = [ `Uchar of uchar | `End | `Await ]
+(** The type for normalizer results. See {!add}. *)
+
 val create : [< form ] -> t
 (** [create nf] is an Unicode text normalizer for the normal form [nf]. *)
 
 val form : t -> form
 (** [form n] is the normalization form of [n]. *)
 
-val add : t -> [ `Uchar of uchar | `Await | `End ] ->
-[ `Uchar of uchar | `Await ]
+val add : t -> [ `Uchar of uchar | `Await | `End ] -> ret
 (** [add n v] is:
     {ul
     {- [`Uchar u] if [u] is the next character in the normalized
@@ -98,6 +100,9 @@ val reset : t -> unit
 val copy : t -> t
 (** [copy n] is a copy of [n] in its current state. Subsequent
     {!add}s on [n] do not affect the copy. *)
+
+val pp_ret : Format.formatter -> ret -> unit
+(** [pp_ret ppf v] prints an unspecified representation of [v] on [ppf]. *)
 
 (** {1:props Normalization properties}
 
@@ -174,7 +179,7 @@ let nfd = Uunf.create `NFD;;
 {[
 let rec add acc v = match Uunf.add nfd v with
 | `Uchar u -> add (u :: acc) `Await
-| `Await -> acc
+| `Await | `End -> acc
 ]}
     For example to normalize the character [U+00E9] (é) with [nfd] to a list
     of characters we can write:
@@ -198,7 +203,7 @@ let utf_8_normalize nf s =
   let n = Uunf.create nf in
   let rec add v = match Uunf.add n v with
   | `Uchar u -> Uutf.Buffer.add_utf_8 b u; add `Await
-  | `Await -> ()
+  | `Await | `End -> ()
   in
   let add_uchar _ _ = function
   | `Malformed _ -> add (`Uchar Uutf.u_rep)

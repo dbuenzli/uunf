@@ -5,7 +5,7 @@ let utf_8_normalize nf s =
   let n = Uunf.create nf in
   let rec add v = match Uunf.add n v with
   | `Uchar u -> Uutf.Buffer.add_utf_8 b u; add `Await
-  | `Await -> ()
+  | `Await | `End -> ()
   in
   let add_uchar _ _ = function
   | `Malformed _ -> add (`Uchar Uutf.u_rep)

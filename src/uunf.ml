@@ -111,7 +111,12 @@ let composite u1 u2 =
 
 (* Normalize *)
 
-type ret = [`Await | `Uchar of uchar ]
+type ret = [ `Uchar of uchar | `End | `Await ]
+let pp_ret ppf v = match (v :> ret) with
+| `Uchar u -> Format.fprintf ppf "`Uchar %04X" u
+| `End -> Format.fprintf ppf "`End"
+| `Await -> Format.fprintf ppf "`Await"
+
 type form = [ `NFC | `NFD | `NFKC | `NFKD ]
 type state =                                            (* normalizer state. *)
 | Start                                                   (* no cp seen yet. *)
@@ -242,13 +247,15 @@ let add n = function
         if acc_empty n
         then (n.state <- if is_end n then End else Boundary; `Await)
         else flush_next n
-    | Start | End | Boundary | Acc -> `Await
+    | Start | Boundary | Acc -> `Await
+    | End -> `End
     end
 | `End ->
     begin match n.state with
     | Boundary -> n.state <- End; (n.uc :> ret)
     | Acc -> n.state <- Flush; n.uc <- `Uchar ux_eoi; flush_start n
-    | Start | End -> `Await
+    | Start -> n.state <- End; `End
+    | End -> `End
     | Flush -> invalid_add ()
     end
 

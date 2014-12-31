@@ -1,3 +1,5 @@
+* Use topkg.
+* Use cmdliner for unftrip.
 * Adopt a data generation procedure similar to Uucp. The current one
   is just too ugly.
 * Make it dependent on Uucp ? Assert what kind of performance

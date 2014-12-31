@@ -84,7 +84,7 @@ let test_conformance_normalizations tests =
   let nkd, nfkd = Array.init 5 (fun _ -> Uunf.create `NFKD), Array.make 5 [] in
   let rec add n acc v = match Uunf.add n v with
   | `Uchar u -> add n (u :: acc) `Await
-  | `Await -> acc
+  | `Await | `End -> acc
   in
   let parallel_add i v =
     nfc.(i) <- add nc.(i) nfc.(i) v;
@@ -136,7 +136,7 @@ let test_conformance_non_decomposables decomps =
   let norm n u =
     let rec add acc v = match Uunf.add n v with
     | `Uchar u ->  add (u :: acc) `Await
-    | `Await -> acc
+    | `Await | `End -> acc
     in
     List.rev (add (add [] (`Uchar u)) `End)
   in
@@ -160,7 +160,7 @@ let test_others () =
     let n = Uunf.create nf in
     let rec add acc v = match Uunf.add n v with
     | `Uchar u -> add (u :: acc) `Await
-    | `Await -> acc
+    | `Await | `End -> acc
     in
     let add_uchar acc u = add acc (`Uchar u) in
     let nseq = List.rev (add (List.fold_left add_uchar [] src) `End) in
