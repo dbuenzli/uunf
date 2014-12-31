@@ -1,8 +1,10 @@
 _build
 data/data.ml
 data/ucd.xml
-data/test.txt
+test/NormalizationTest.txt
 tmp
+*.native
+*.byte
 *~
 \.\#*
 \#*#
