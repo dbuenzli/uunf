@@ -1,0 +1,6 @@
+PKG uucd
+S src
+S data
+S test
+S support
+B _build/**

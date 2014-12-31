@@ -4,7 +4,7 @@ homepage: "http://erratique.ch/software/uunf"
 authors: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
 doc: "http://erratique.ch/software/uunf/doc/Uunf"
 dev-repo: "http://erratique.ch/repos/uunf.git"
-tags: [ "unicode" "text" ]
+tags: [ "unicode" "text" "normalization" "org:erratique" ]
 license: "BSD3"
 depopts: [ "uutf" ]
 ocaml-version: [>= "4.00.0"]
