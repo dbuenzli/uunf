@@ -50,7 +50,8 @@ let id inf d first_dec out =                            (* no normalization. *)
 let normalize nf inf d first_dec out =                   (* normalize to nf. *)
   let n = Uunf.create nf in
   let rec add v = match Uunf.add n v with
-  | `Uchar cp as u -> out u; add `Await | `Await -> ()
+  | `Uchar cp as u -> out u; add `Await
+  | `Await | `End -> ()
   in
   let rec loop d = function
   | `Uchar _ as v -> add v; loop d (Uutf.decode d)
@@ -89,7 +90,8 @@ let rec r_id out rcount =
 let r_normalize nf out rcount =
   let n = Uunf.create nf in
   let rec add v = match Uunf.add n v with
-  | `Uchar cp as u -> out u; add `Await | `Await -> ()
+  | `Uchar cp as u -> out u; add `Await
+  | `Await | `End -> ()
   in
   let rec loop rcount =
     if rcount = 0 then (add `End; out `End) else
