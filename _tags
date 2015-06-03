@@ -4,5 +4,5 @@
 <data> : include
 
 <data/extract_data.{ml,mli,byte,native}> : package(xmlm), package(uucd)
-<test/unftrip.{ml,mli,byte,native}> : package(uutf)
+<test/unftrip.{ml,mli,byte,native}> : package(uutf), package(cmdliner)
 <test/examples.{ml,mli,byte,native}> : package(uutf)
