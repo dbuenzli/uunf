@@ -11,10 +11,13 @@
     Unicode text data structure and it can process text without a
     complete in-memory representation of the data.
 
+    The supported Unicode version is determined by the {!unicode_version}
+    value.
+
     Consult the {{!basics}basics}, {{!limits}limitations} and
     {{!examples}examples} of use.
 
-    {e Release %%VERSION%% — Unicode version %%UNICODEVERSION%% —
+    {e Release %%VERSION%% — Unicode version %%UNICODE_VERSION%% —
        %%MAINTAINER%% }
     {3 References}
     {ul

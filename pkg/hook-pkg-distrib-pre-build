@@ -1,9 +1,0 @@
-#!/bin/sh
-
-set -e
-
-# Copies from original repo into cloned repo
-cp -R $ORIGINALREPO/data/ucd.xml $ORIGINALREPO/data/test.txt data
-
-./build data
-./build substdata

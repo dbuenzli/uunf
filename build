@@ -1,43 +1,47 @@
 #!/bin/sh
-# This script is only used for developement. It is removed by the 
-# distribution process. 
+# This script is only used for developement. It is removed by the
+# distribution process.
 
 set -e
 
 OCAMLBUILD=${OCAMLBUILD:="ocamlbuild -tag debug -classic-display \
                           -use-ocamlfind"}
 
-action () 
+action ()
 {
     case $1 in
-        default)   $OCAMLBUILD uunf.cmx ;;
+        default)   $OCAMLBUILD uunf.cma uunf.cmxa ;;
         tests)     $OCAMLBUILD test/tests.otarget ;;
-        test)      $OCAMLBUILD test.native; ./test.native data/test.txt ;;
-        doc)       shift; pkg-doc $* doc/api.docdir ;;
-        data)      data ;;
-        substdata) substdata ;;
+        download-test-files)
+            # FIXME this should source from UNICODE_VERSION
+            curl -# -S \
+         "http://www.unicode.org/Public/UCD/latest/ucd/NormalizationTest.txt" \
+            > test/NormalizationTest.txt
+            ;;
+        test)      $OCAMLBUILD test.native;
+                   ./test.native test/NormalizationTest.txt ;;
+        doc)       shift; pkg-doc $* doc/dev-api.docdir ;;
+        api-doc)   shift; pkg-doc $* doc/api.docdir ;;
+        gen_props)  $OCAMLBUILD gen_props.native ;;
+        support)   action gen_props
+                   check_db
+                   ./gen_props.native -norm src/data/uunf_data.ml
+                   ;;
         clean)     $OCAMLBUILD -clean
-                   rm data/data.ml ;;
+                   rm -f src/*_data.ml
+                   ;;
         *)         $OCAMLBUILD $* ;;
     esac
 }
 
-data ()
+check_db ()
 {
-    $OCAMLBUILD extract_data.native
-    _build/data/extract_data.native data/ucd.xml | \
-    cat data/defs.ml - > data/data.ml
+    if [ ! -f "support/ucd.xml" ]; then
+        echo "Missing unicode character database support/ucd.xml, see DEVEL.md"
+        exit 1
+    fi
 }
 
-substdata ()
-{
-    F=src/uunf
-    sed -e "/^.*%%UNICODEDATA%%.*$/r data/data.ml" \
-        -e "/%%UNICODESUPPRESS%%/ d" $F.ml > $F.tmp
-    mv -f $F.tmp $F.ml
-    rm -r data
-}
-
-if [ $# -eq 0 ]; 
-then action default ; 
+if [ $# -eq 0 ];
+then action default ;
 else action $*; fi

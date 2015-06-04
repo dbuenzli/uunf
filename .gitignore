@@ -1,6 +1,6 @@
 _build
-data/data.ml
-data/ucd.xml
+src/data/uunf_data.ml
+support/ucd.xml
 test/NormalizationTest.txt
 tmp
 *.native

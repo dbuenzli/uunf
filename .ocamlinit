@@ -1,9 +1,0 @@
-#directory "_build/src"
-#directory "_build/data"
-#load "data.cmo"
-#load "uunf.cmo"
-
-let print_uchar : Format.formatter -> Uunf.uchar -> unit = 
-  fun ppf u -> Format.fprintf ppf "0x%X" u;;
-
-#install_printer print_uchar

@@ -36,28 +36,15 @@ let is_scalar_value i =
 
 (* Normalization properties. *)
 
-let unicode_version = "%%UNICODEVERSION%%"
+let unicode_version = "%%UNICODE_VERSION%%"
 
-(* START GENERATED DATA, DO NOT EDIT *)
-module Data = struct
-(* %%UNICODESUPPRESS%% *) let err () = invalid_arg "stub data, do ./build data"
-(* %%UNICODESUPPRESS%% *) let nfc_boundary u = err ()
-(* %%UNICODESUPPRESS%% *) let nfd_boundary u = err ()
-(* %%UNICODESUPPRESS%% *) let nfkc_boundary u = err ()
-(* %%UNICODESUPPRESS%% *) let nfkd_boundary u = err ()
-(* %%UNICODESUPPRESS%% *) let ccc u = err ()
-(* %%UNICODESUPPRESS%% *) let decomp u = err ()
-(* %%UNICODESUPPRESS%% *) let compose u = err ()
-(* %%UNICODESUPPRESS%% *) include Data
-(* %%UNICODEDATA%% *)
-end
-(* END GENERATED DATA *)
-
-let nfc_boundary u = Data.nfc_boundary u
-let nfd_boundary u = Data.nfd_boundary u
-let nfkc_boundary u = Data.nfkc_boundary u
-let nfkd_boundary u = Data.nfkd_boundary u
-let ccc = Data.ccc
+let nfc_boundary u = Uunf_tmapbool.get Uunf_data.nfc_boundary_map u
+let nfd_boundary u = Uunf_tmapbool.get Uunf_data.nfd_boundary_map u
+let nfkc_boundary u = Uunf_tmapbool.get Uunf_data.nfkc_boundary_map u
+let nfkd_boundary u = Uunf_tmapbool.get Uunf_data.nfkd_boundary_map u
+let ccc u = Uunf_tmapbyte.get Uunf_data.ccc_map u
+let decomp_prop u = Uunf_tmap.get Uunf_data.decomp_map u
+let compose_prop u = Uunf_tmap.get Uunf_data.compose_map u
 
 module H = struct                            (* Hangul arithmetic constants. *)
   let sbase = 0xAC00
@@ -73,7 +60,7 @@ module H = struct                            (* Hangul arithmetic constants. *)
 end
 
 let decomp u =
-  if u < 0xAC00 || 0xD7A3 < u then Data.decomp u else
+  if u < 0xAC00 || 0xD7A3 < u then decomp_prop u else
   begin                                        (* LV or LVT hangul composite *)
     let sindex = u - H.sbase in
     let l = H.lbase + (sindex / H.ncount) in
@@ -103,7 +90,7 @@ let _composite u1 u2 =
       if u2 < 0x11A8 || u2 > 0x11C3 then ux_none else
       (u1 + u2 - H.tbase)                            (* LVT hangul composite *)
     end
-  else match Data.compose u1 with
+  else match compose_prop u1 with
   | [||] -> ux_none
   | a (* [u2; c; u2'; c'; ...] sorted *) ->
       let len = Array.length a / 2 in
@@ -140,7 +127,7 @@ type t =
     mutable first : int;                (* index of first code point in acc. *)
     mutable last : int; }                (* index of last code point in acc. *)
 
-let create_acc () = Array.create 35 ux_eoi
+let create_acc () = Array.make 35 ux_eoi
 let create form  =
   let boundary, compat, compose = match form with
   | `NFC -> nfc_boundary, false, true
@@ -162,7 +149,7 @@ let reset n =
 
 let grow_acc n =
   let len = Array.length n.acc in
-  let acc' = Array.create (2 * len) ux_eoi in
+  let acc' = Array.make (2 * len) ux_eoi in
   Array.blit n.acc 0 acc' 0 len; n.acc <- acc'
 
 let ordered_add n u =    (* canonical ordering algorithm via insertion sort. *)
@@ -188,7 +175,7 @@ let rec add n u =
       (ordered_add n l; ordered_add n v; ordered_add n t)
     end
   else
-    begin match Data.decomp u with
+    begin match decomp_prop u with
     | [||] -> ordered_add n u
     | d ->
         if d_compatibility d.(0) && not n.compat then ordered_add n u else

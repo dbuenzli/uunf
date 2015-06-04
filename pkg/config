@@ -1,6 +1,0 @@
-NAME=uunf
-VERSION=`git describe master | sed "s/^.//"`
-UNICODEVERSION="7.0.0"
-MAINTAINER="Daniel Bünzli <daniel.buenzl i\\\@erratique.ch>"
-
-VARSUBST="s|%%UNICODEVERSION%%|$UNICODEVERSION|g;"
