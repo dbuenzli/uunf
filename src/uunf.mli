@@ -214,6 +214,9 @@ let utf_8_normalize nf s =
   in
   Uutf.String.fold_utf_8 add_uchar () s; add `End; Buffer.contents b
 ]}
+
+   Note that this functionality is available directly through
+   {!Uunf_string.normalize_utf_8}
 *)
 
 (*---------------------------------------------------------------------------

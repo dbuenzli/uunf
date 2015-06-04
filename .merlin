@@ -1,4 +1,4 @@
-PKG uucd cmdliner
+PKG uucd cmdliner uutf
 S src
 S data
 S test

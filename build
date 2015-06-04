@@ -10,7 +10,7 @@ OCAMLBUILD=${OCAMLBUILD:="ocamlbuild -tag debug -classic-display \
 action ()
 {
     case $1 in
-        default)   $OCAMLBUILD uunf.cma uunf.cmxa ;;
+        default)   $OCAMLBUILD uunf.cma uunf.cmxa uunf_string.cmxa ;;
         tests)     $OCAMLBUILD test/tests.otarget ;;
         download-test-files)
             # FIXME this should source from UNICODE_VERSION

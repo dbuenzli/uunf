@@ -1,8 +1,19 @@
-version = "%%VERSION%%"
 description = "Unicode text normalization for OCaml"
+version = "%%VERSION%%"
+
 archive(byte) = "uunf.cma"
 archive(byte, plugin) = "uunf.cma"
 archive(native) = "uunf.cmxa"
 archive(native, plugin) = "uunf.cmxs"
 exists_if = "uunf.cma"
 
+package "string" (
+  description = "Unicode text normalization on UTF-X OCaml strings"
+  version = "%%VERSION%%"
+  requires = "uunf uutf"
+  archive(byte) = "uunf_string.cma"
+  archive(byte, plugin) = "uunf_string.cma"
+  archive(native) = "uunf_string.cmxa"
+  archive(native, plugin) = "uunf_string.cmxs"
+  exists_if = "uunf_string.cma"
+)

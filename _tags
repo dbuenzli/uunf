@@ -6,6 +6,8 @@ true : package(bytes)
 <support> : include
 <test> : include
 
+<src/uunf_string*> : package(uutf)
 <support/gen*{ml,mli,byte,native}> : package(xmlm), package(uucd)
+<test/test_string*> : package(uutf)
 <test/unftrip.{ml,mli,byte,native}> : package(uutf), package(cmdliner)
 <test/examples.{ml,mli,byte,native}> : package(uutf)
