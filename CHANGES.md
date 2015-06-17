@@ -1,8 +1,21 @@
+v1.0.0 2015-XX-XX Cambridge (UK)
+--------------------------------
 
-- `Uunf.add` now returns ````End``` whenever the latter was encoded
-  and there's character stream was entirely output. In most existing
-  programs this will simply entail to add ```End``` to the existing
-  ```Await``` case in pattern matches on the result of `Uunf.add`.
+- Updated for Unicode 8.0.0
+- `topkg` support
+- `Uunf.add` now eventually returns `` `End`` whenever the latter was
+  encoded and the character stream was entirely output. In most existing
+  programs this will simply entail to add `` `End`` to the existing
+  `` `Await`` case in pattern matches on the result of `Uunf.add`.
+- Adds the `Uunf_string` library that allows to directly normalize UTF-X
+  OCaml encoded strings. This library depends on `Uutf`.
+- Rewrote the utility `unftrip` to use `Cmdliner` which is now
+  an optional dependency of the package. The cli interface is
+  incompatible with previous versions. Support for random
+  Unicode scalar value  generation was removed, use `utftrip` from
+  the `Uutf` package for that.
+- Rewrote the module's data generation to essentially match what is done
+  in `Uucp`. Much less ugly, no source file `sed`ding.
 
 v0.9.3 2014-06-16 Cambridge (UK)
 --------------------------------
