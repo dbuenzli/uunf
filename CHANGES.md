@@ -1,4 +1,4 @@
-v1.0.0 2015-XX-XX Cambridge (UK)
+v1.0.0 2015-06-17 Cambridge (UK)
 --------------------------------
 
 - Updated for Unicode 8.0.0
