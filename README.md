@@ -9,7 +9,7 @@ without a complete in-memory representation.
 
 Uunf has no dependency. It may optionally depend on [Uutf][2] for
 support on OCaml UTF-X encoded strings. It is distributed under the
-BSD3 license.
+ISC license.
 
 [1]: http://www.unicode.org/reports/tr15/
 [2]: http://erratique.ch/software/uutf
