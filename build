@@ -10,25 +10,19 @@ OCAMLBUILD=${OCAMLBUILD:="ocamlbuild -tag debug -classic-display \
 action ()
 {
     case $1 in
-        default)   $OCAMLBUILD uunf.cma uunf.cmxa uunf_string.cmxa ;;
-        tests)     $OCAMLBUILD test/tests.otarget ;;
+        default) topkg build ;;
         download-test-files)
             # FIXME this should source from UNICODE_VERSION
             curl -# -S \
          "http://www.unicode.org/Public/UCD/latest/ucd/NormalizationTest.txt" \
             > test/NormalizationTest.txt
             ;;
-        test)      $OCAMLBUILD test.native;
-                   ./test.native test/NormalizationTest.txt ;;
-        doc)       shift; pkg-doc $* doc/dev-api.docdir ;;
-        api-doc)   shift; pkg-doc $* doc/api.docdir ;;
-        gen_props)  $OCAMLBUILD gen_props.native ;;
-        support)   action gen_props
-                   check_db
-                   ./gen_props.native -norm src/data/uunf_data.ml
-                   ;;
-        clean)     $OCAMLBUILD -clean
-                   rm -f src/*_data.ml
+        test)      topkg build && topkg test -- test/NormalizationTest.txt ;;
+        doc)       shift; topkg doc --dev $* ;;
+        api-doc)   shift; topkg doc $* ;;
+        support)   ocaml "pkg/build_support.ml" ;;
+        clean)     topkg clean
+                   rm -f src/uunf_data.ml
                    ;;
         *)         $OCAMLBUILD $* ;;
     esac

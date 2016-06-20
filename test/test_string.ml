@@ -37,7 +37,7 @@ let main () =
   test_others Uutf.Buffer.add_utf_8 Uunf_string.normalize_utf_8;
   test_others Uutf.Buffer.add_utf_16be Uunf_string.normalize_utf_16be;
   test_others Uutf.Buffer.add_utf_16le Uunf_string.normalize_utf_16le;
-  Printf.printf "All tests passed";
+  Printf.printf "Uunf_string: All tests passed\n";
   ()
 
 let () = if (not !Sys.interactive) then main ()

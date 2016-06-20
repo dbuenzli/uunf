@@ -8,7 +8,7 @@ root directory of the repository type:
     ln -s $DBPATH support/ucd.xml
     ./build support
 
-The result is in the file `src/data/uunf_data.ml`. It contains
+The result is in the file `src/uunf_data.ml`. It contains
 the data extracted from the Unicode character database needed to
 implement the normalization forms. This file is ignored by git.
 

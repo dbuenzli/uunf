@@ -1,13 +1,12 @@
-true : package(bytes)
+true : bin_annot, package(bytes)
 
-<**/*.{ml,mli}> : bin_annot
-<src> : include
-<src/data> : include
 <support> : include
-<test> : include
-
-<src/uunf_string*> : package(uutf)
 <support/gen*{ml,mli,byte,native}> : package(xmlm), package(uucd)
+
+<src> : include
+<src/uunf_string*> : package(uutf)
+
+<test> : include
 <test/test_string*> : package(uutf)
-<test/unftrip.{ml,mli,byte,native}> : package(uutf), package(cmdliner)
-<test/examples.{ml,mli,byte,native}> : package(uutf)
+<test/unftrip*> : package(uutf), package(cmdliner)
+<test/examples*> : package(uutf)

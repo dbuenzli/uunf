@@ -1,19 +1,18 @@
 description = "Unicode text normalization for OCaml"
 version = "%%VERSION%%"
-
+requires = "bytes"
 archive(byte) = "uunf.cma"
-archive(byte, plugin) = "uunf.cma"
 archive(native) = "uunf.cmxa"
-archive(native, plugin) = "uunf.cmxs"
-exists_if = "uunf.cma"
+plugin(byte) = "uunf.cma"
+plugin(native) = "uunf.cmxs"
 
 package "string" (
   description = "Unicode text normalization on UTF-X OCaml strings"
   version = "%%VERSION%%"
   requires = "uunf uutf"
   archive(byte) = "uunf_string.cma"
-  archive(byte, plugin) = "uunf_string.cma"
   archive(native) = "uunf_string.cmxa"
-  archive(native, plugin) = "uunf_string.cmxs"
+  plugin(byte) = "uunf_string.cma"
+  plugin(native) = "uunf_string.cmxs"
   exists_if = "uunf_string.cma"
 )
