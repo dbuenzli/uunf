@@ -17,8 +17,9 @@
     Consult the {{!basics}basics}, {{!limits}limitations} and
     {{!examples}examples} of use.
 
-    {e Release %%VERSION%% — Unicode version %%UNICODE_VERSION%% —
-       %%MAINTAINER%% }
+    {e %%VERSION%% — Unicode version %%UNICODE_VERSION%% —
+       {{:%%PKG_HOMEPAGE%% }homepage}}
+
     {3 References}
     {ul
     {- The Unicode Consortium.

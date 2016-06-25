@@ -11,8 +11,8 @@
     {b Warning.} All these function silently replace malformed encoded Unicode
     data by a {!Uutf.u_rep} character.
 
-    {e Release %%VERSION%% — Unicode version %%UNICODE_VERSION%% —
-       %%MAINTAINER%% } *)
+    {e %%VERSION%% — Unicode version %%UNICODE_VERSION%% —
+       {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** {1:norm Normalize} *)
 
