@@ -1,4 +1,4 @@
-true : bin_annot, package(bytes)
+true : bin_annot, safe_string, package(bytes)
 
 <support> : include
 <support/gen*{ml,mli,byte,native}> : package(xmlm), package(uucd)

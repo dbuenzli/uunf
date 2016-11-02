@@ -33,9 +33,10 @@ let set m u byte =
   let i = u lsr l0_shift in
   if m.l0.(i) == nil then m.l0.(i) <- Array.make l1_size snil;
   let j = u lsr l1_shift land l1_mask in
-  if m.l0.(i).(j) == snil then m.l0.(i).(j) <- l2_make m;
+  if m.l0.(i).(j) == snil then
+    m.l0.(i).(j) <- Bytes.unsafe_to_string (l2_make m);
   let k = u land l2_mask in
-  Bytes.set m.l0.(i).(j) k (Char.unsafe_chr byte)
+  Bytes.set (Bytes.unsafe_of_string m.l0.(i).(j)) k (Char.unsafe_chr byte)
 
 let size m = match m.l0 with
 | [||] -> 3 + 1

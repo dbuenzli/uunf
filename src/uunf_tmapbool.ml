@@ -37,7 +37,8 @@ let set m u b =
   let i = u lsr l0_shift in
   if m.l0.(i) == nil then m.l0.(i) <- Array.make l1_size snil;
   let j = u lsr l1_shift land l1_mask in
-  if m.l0.(i).(j) == snil then m.l0.(i).(j) <- l2_make m;
+  if m.l0.(i).(j) == snil then
+    m.l0.(i).(j) <- Bytes.unsafe_to_string (l2_make m);
   let k = u land l2_mask in
   let byte_num = k lsr 3 (* / 8 *) in
   let bit_num = k land 7 (* mod 8 *) in
@@ -46,7 +47,7 @@ let set m u b =
     if b then (Char.unsafe_chr (byte lor (1 lsl bit_num))) else
     (Char.unsafe_chr (byte land lnot (1 lsl bit_num)))
   in
-  Bytes.set m.l0.(i).(j) byte_num new_byte
+  Bytes.set (Bytes.unsafe_of_string m.l0.(i).(j)) byte_num new_byte
 
 let size m = match m.l0 with
 | [||] -> 3 + 1
