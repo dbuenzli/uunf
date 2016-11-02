@@ -4,7 +4,11 @@
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-let normalize_utf_x fold_x add_x nf s =
+let normalize_utf_x
+    (fold_x :
+       ?pos:int -> ?len:int -> 'a Uutf.String.folder -> 'a -> string -> 'a)
+    add_x nf s
+  =
   let b = Buffer.create (String.length s * 3) in
   let n = Uunf.create nf in
   let rec add v = match Uunf.add n v with
