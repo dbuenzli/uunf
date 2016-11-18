@@ -28,7 +28,7 @@ let log_malformed inf d bs =
 (* Output *)
 
 let uchar_dump ppf = function
-| `End -> () | `Uchar u -> pp ppf "%a@\n" Uutf.pp_cp u
+| `End -> () | `Uchar u -> pp ppf "%a@\n" Uchar.dump u
 
 let uchar_encoder enc =
   let enc = match enc with `ISO_8859_1 | `US_ASCII -> `UTF_8

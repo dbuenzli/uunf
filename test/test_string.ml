@@ -8,7 +8,7 @@ let test_others enc normalize =
   let b = Buffer.create 42 in
   let enc us =
     let rec loop = function
-    | u :: us -> enc b u; loop us
+    | u :: us -> enc b (Uchar.of_int u); loop us
     | [] -> Buffer.contents b
     in
     Buffer.reset b; loop us

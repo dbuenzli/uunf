@@ -7,9 +7,9 @@
 (** Unicode text normalization.
 
     [Uunf] normalizes Unicode text.  It supports all Unicode
-    normalization forms. The module is independent from any IO mechanism or
-    Unicode text data structure and it can process text without a
-    complete in-memory representation of the data.
+    normalization forms. The module is independent from any IO
+    mechanism or Unicode text data structure and it can process text
+    without a complete in-memory representation of the data.
 
     The supported Unicode version is determined by the {!unicode_version}
     value.
@@ -32,19 +32,6 @@
     {e {{:http://www.unicode.org/charts/normalization/}Normalization charts}.
     }}} *)
 
-(** {1 Characters} *)
-
-type uchar = int
-(** The type for Unicode characters. A value of this type {b must}
-    be an Unicode
-    {{:http://www.unicode.org/glossary/#unicode_scalar_value} scalar value}
-    which is an integer value in the ranges [0x0000]...[0xD7FF]
-    and [0xE000]...[0x10FFFF]. *)
-
-val is_scalar_value : int -> bool
-(** [is_scalar_value n] is [true] iff [n] is an Unicode
-    {{:http://www.unicode.org/glossary/#Unicode_scalar_value}scalar value}. *)
-
 (** {1 Normalize} *)
 
 type form = [ `NFD | `NFC | `NFKD | `NFKC ]
@@ -65,7 +52,7 @@ type form = [ `NFD | `NFC | `NFKD | `NFKC ]
 type t
 (** The type for Unicode text normalizers. *)
 
-type ret = [ `Uchar of uchar | `End | `Await ]
+type ret = [ `Uchar of Uchar.t | `End | `Await ]
 (** The type for normalizer results. See {!add}. *)
 
 val create : [< form ] -> t
@@ -74,7 +61,7 @@ val create : [< form ] -> t
 val form : t -> form
 (** [form n] is the normalization form of [n]. *)
 
-val add : t -> [ `Uchar of uchar | `Await | `End ] -> ret
+val add : t -> [ `Uchar of Uchar.t | `Await | `End ] -> ret
 (** [add n v] is:
     {ul
     {- [`Uchar u] if [u] is the next character in the normalized
@@ -117,12 +104,12 @@ val pp_ret : Format.formatter -> ret -> unit
 val unicode_version : string
 (** [unicode_version] is the Unicode version supported by the module. *)
 
-val ccc : uchar -> int
+val ccc : Uchar.t -> int
 (** [ccc u] is [u]'s
     {{:http://www.unicode.org/glossary/#combining_class}canonical combining
     class} value. *)
 
-val decomp : uchar -> int array
+val decomp : Uchar.t -> int array
 (** [decomp u] is [u]'s
     {{:http://www.unicode.org/glossary/#decomposition_mapping}decomposition
     mapping}. If the empty array is returned, [u] decomposes to itself.
@@ -131,17 +118,17 @@ val decomp : uchar -> int array
     cannot be used as an {!uchar}. Use {!d_uchar} on the number to get the
     actual character and {!d_compatibility} to find out if this is
     a compatibility decomposition. All other characters of the array
-    are guaranteed to be of type {!uchar}.
+    are guaranteed to be convertible using {!Uchar.of_int}.
 
     {b Warning.} Do {b not} mutate the array. *)
 
-val d_uchar : int -> uchar
+val d_uchar : int -> Uchar.t
 (** See {!decomp}. *)
 
 val d_compatibility : int -> bool
 (** See {!decomp}. *)
 
-val composite : uchar -> uchar -> uchar option
+val composite : Uchar.t -> Uchar.t -> Uchar.t option
 (** [composite u1 u2] is the
     {{:http://www.unicode.org/glossary/#primary_composite}primary composite}
     canonically equivalent to  the sequence [<u1,u2>], if any. *)
@@ -188,7 +175,8 @@ let rec add acc v = match Uunf.add nfd v with
     For example to normalize the character [U+00E9] (é) with [nfd] to a list
     of characters we can write:
 {[
-let e_acute_nfd = List.rev (add (add [] (`Uchar 0x00E9)) `End)
+let e_acute = Uchar.of_int 0x00E9
+let e_acute_nfd = List.rev (add (add [] (`Uchar e_acute)) `End)
 ]}
     The next section has more examples.
 *)

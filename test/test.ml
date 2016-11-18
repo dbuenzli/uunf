@@ -28,12 +28,11 @@ let fail fmt =
 (* Conformance data decoding *)
 
 type conformance_test = int list array * string        (* columns + comment. *)
-module Cp = struct type t = int let compare : int -> int -> int = compare end
-module CpSet = Set.Make(Cp)             (* not a diet set, but will do here. *)
+module Uset = Set.Make(Uchar)          (* not a diet set, but will do here. *)
 
 let err_test_file () = invalid_arg "test data file invariant violated"
 
-let cp_of_string v =                           (* parses a code point value. *)
+let uchar_of_string v =                            (* parses a scalar value. *)
   let is_hex c = (0x30 <= c && c <= 0x39) || (0x41 <= c && c <= 0x46) in
   let cp = ref 0 in
   for k = 0 to (String.length v) - 1 do
@@ -41,9 +40,9 @@ let cp_of_string v =                           (* parses a code point value. *)
     if not (is_hex c) then failwith "" else
     cp := !cp * 16 + (if c <= 0x39 then c - 48 else c - 55)
   done;
-  !cp
+  Uchar.of_int !cp
 
-let cps_of_string v = List.map cp_of_string (split_string v ' ')
+let uchars_of_string v = List.map uchar_of_string (split_string v ' ')
 let decode_conformance_data ic =
   let rec loop tests collect_decomps decomps =
     match try Some (input_line ic) with End_of_file -> None with
@@ -57,13 +56,14 @@ let decode_conformance_data ic =
         | test :: comment :: _ ->
             begin match split_string test ';' with
             | c1 :: c2 :: c3 :: c4 :: c5 :: _ ->
-                let test = [| cps_of_string c1; cps_of_string c2;
-                              cps_of_string c3; cps_of_string c4;
-                              cps_of_string c5; |], comment
+                let test = [| uchars_of_string c1; uchars_of_string c2;
+                              uchars_of_string c3; uchars_of_string c4;
+                              uchars_of_string c5; |], comment
                 in
                 let decomps =
                   if not collect_decomps then decomps else
-                  match (fst test).(0) with [ cp ] -> CpSet.add cp decomps
+                  match (fst test).(0) with [ uchar ] ->
+                    Uset.add uchar decomps
                   | _ -> failwith ""
                 in
                 loop (test :: tests) collect_decomps decomps
@@ -73,7 +73,7 @@ let decode_conformance_data ic =
           log "Unable to parse line:\n`%s'\n" l;
           loop tests collect_decomps decomps
   in
-  loop [] false CpSet.empty
+  loop [] false Uset.empty
 
 (* Tests *)
 
@@ -141,19 +141,26 @@ let test_conformance_non_decomposables decomps =
     List.rev (add (add [] (`Uchar u)) `End)
   in
   let check u =
-    if CpSet.mem u decomps then () else
+    if Uset.mem u decomps then () else
     begin
       let ul = [u] in
       Uunf.reset nc; Uunf.reset nd; Uunf.reset nkc; Uunf.reset nkd;
-      if norm nc u <> ul then fail "NFC: U+%04X <> toNFC(U+%04X)" u u;
-      if norm nd u <> ul then fail "NFD: U+%04X <> toNFD(U+%04X)" u u;
-      if norm nkc u <> ul then fail "NFKC: U+%04X <> toNFKC(U+%04X)" u u;
-      if norm nkd u <> ul then fail "NFKD: U+%04X <> toNFKD(U+%04X)" u u;
+      if norm nc u <> ul then
+        fail "NFC: %a <> toNFC(%a)" Uchar.dump u Uchar.dump u;
+      if norm nd u <> ul then
+        fail "NFD: %a <> toNFD(%a)" Uchar.dump u Uchar.dump u;
+      if norm nkc u <> ul then
+        fail "NFKC: %a <> toNFKC(%a)" Uchar.dump u Uchar.dump u;
+      if norm nkd u <> ul then
+        fail "NFKD: %a <> toNFKD(%a)" Uchar.dump u Uchar.dump u;
     end
   in
   (* For each unicode scalar value *)
-  for u = 0x0000 to 0xD7FF do check u done;
-  for u = 0xE000 to 0x10FFFF do check u done
+  let rec loop u =
+    if Uchar.equal Uchar.max u then check u else
+    (check u; loop (Uchar.succ u))
+  in
+  loop Uchar.min
 
 let test_others () =
   let test src nf dst =
@@ -162,8 +169,9 @@ let test_others () =
     | `Uchar u -> add (u :: acc) `Await
     | `Await | `End -> acc
     in
-    let add_uchar acc u = add acc (`Uchar u) in
+    let add_uchar acc u = add acc (`Uchar (Uchar.of_int u)) in
     let nseq = List.rev (add (List.fold_left add_uchar [] src) `End) in
+    let dst = List.map Uchar.of_int dst in
     if nseq <> dst then fail ""
   in
   test [0x1E69] `NFD [0x0073; 0x0323; 0x0307];

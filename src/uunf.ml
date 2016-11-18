@@ -4,9 +4,9 @@
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-type ret = [ `Uchar of int | `End | `Await ]
+type ret = [ `Uchar of Uchar.t | `End | `Await ]
 let pp_ret ppf v = match (v :> ret) with
-| `Uchar u -> Format.fprintf ppf "`Uchar %04X" u
+| `Uchar u -> Format.fprintf ppf "`Uchar %a" Uchar.dump u
 | `End -> Format.fprintf ppf "`End"
 | `Await -> Format.fprintf ppf "`Await"
 
@@ -27,12 +27,9 @@ let err_ended add =
 
 (* Characters *)
 
-type uchar = int
-let ux_eoi = max_int                 (* end of input, outside unicode range. *)
-let ux_soi = ux_eoi - 1            (* start of input, outside unicode range. *)
-let ux_none = ux_soi - 2                  (* no char, outside unicode range. *)
-let is_scalar_value i =
-  (0x0000 <= i && i <= 0xD7FF) || (0xE000 <= i && i <= 0x10FFFF)
+let ux_none = max_int                      (* no char, outside unicode range. *)
+let u_dumb =                                     (* placeholder, overwritten. *)
+  `Uchar (Uchar.of_int 0x0000)
 
 (* Normalization properties. *)
 
@@ -42,7 +39,8 @@ let nfc_boundary u = Uunf_tmapbool.get Uunf_data.nfc_boundary_map u
 let nfd_boundary u = Uunf_tmapbool.get Uunf_data.nfd_boundary_map u
 let nfkc_boundary u = Uunf_tmapbool.get Uunf_data.nfkc_boundary_map u
 let nfkd_boundary u = Uunf_tmapbool.get Uunf_data.nfkd_boundary_map u
-let ccc u = Uunf_tmapbyte.get Uunf_data.ccc_map u
+let _ccc u = Uunf_tmapbyte.get Uunf_data.ccc_map u
+let ccc u = Uchar.to_int u
 let decomp_prop u = Uunf_tmap.get Uunf_data.decomp_map u
 let compose_prop u = Uunf_tmap.get Uunf_data.compose_map u
 
@@ -60,6 +58,7 @@ module H = struct                            (* Hangul arithmetic constants. *)
 end
 
 let decomp u =
+  let u = Uchar.to_int u in
   if u < 0xAC00 || 0xD7A3 < u then decomp_prop u else
   begin                                        (* LV or LVT hangul composite *)
     let sindex = u - H.sbase in
@@ -75,7 +74,8 @@ let decomp u =
    indicate the non starter count increment. *)
 
 let d_compatibility i = i land (1 lsl 24) > 0
-let d_uchar i = i land 0x1FFFFF
+let _d_uchar i = i land 0x1FFFFF
+let d_uchar i = Uchar.unsafe_of_int (_d_uchar i)
 
 let _composite u1 u2 =
   if 0x1100 <= u1 && u1 <= 0x1112 then
@@ -103,8 +103,8 @@ let _composite u1 u2 =
       with Exit -> (a.(!i * 2 + 1))
 
 let composite u1 u2 =
-  let u = _composite u1 u2 in
-  if u = ux_none then None else Some u
+  let u = _composite (Uchar.to_int u1) (Uchar.to_int u2) in
+  if u = ux_none then None else Some (Uchar.unsafe_of_int u)
 
 (* Normalize *)
 
@@ -120,14 +120,16 @@ type t =
   { form : form;                                      (* normalization form. *)
     compat : bool;            (* true if compatibility decomposition needed. *)
     compose : bool;                           (* true if composition needed. *)
-    boundary : uchar -> bool;                               (* nfx_boundary. *)
+    boundary : int -> bool;                                 (* nfx_boundary. *)
     mutable state : state;                              (* normalizer state. *)
-    mutable uc : [`Uchar of uchar];         (* last cp with boundary = true. *)
+    mutable uc : [`Uchar of Uchar.t];       (* last cp with boundary = true. *)
     mutable acc : int array;                      (* code point accumulator. *)
     mutable first : int;                (* index of first code point in acc. *)
-    mutable last : int; }                (* index of last code point in acc. *)
+    mutable last : int;                  (* index of last code point in acc. *)
+    mutable is_end : bool;}                      (* [true] if `End was seen. *)
 
-let create_acc () = Array.make 35 ux_eoi
+
+let create_acc () = Array.make 35 ux_none
 let create form  =
   let boundary, compat, compose = match form with
   | `NFC -> nfc_boundary, false, true
@@ -136,29 +138,28 @@ let create form  =
   | `NFKD -> nfkd_boundary, true, false
   in
   { form = (form :> form); compat; compose; boundary; state = Start;
-    uc = `Uchar ux_soi; acc = create_acc (); first = 0; last = -1; }
+    uc = u_dumb; acc = create_acc (); first = 0; last = -1; is_end = false}
 
-let is_end n = let `Uchar u = n.uc in u = ux_eoi
-let get_u n = let `Uchar u = n.uc in u
+let get_u n = let `Uchar u = n.uc in Uchar.to_int u
 let acc_empty n = n.first > n.last
 let form n = n.form
 let copy n = { n with acc = Array.copy n.acc }
 let reset n =
-  n.state <- Start; n.uc <- `Uchar ux_soi; n.acc <- create_acc ();
-  n.first <- 0; n.last <- -1
+  n.state <- Start; n.uc <- u_dumb; n.acc <- create_acc ();
+  n.first <- 0; n.last <- -1; n.is_end <- false
 
 let grow_acc n =
   let len = Array.length n.acc in
-  let acc' = Array.make (2 * len) ux_eoi in
+  let acc' = Array.make (2 * len) ux_none in
   Array.blit n.acc 0 acc' 0 len; n.acc <- acc'
 
 let ordered_add n u =    (* canonical ordering algorithm via insertion sort. *)
   n.last <- n.last + 1; if n.last = Array.length n.acc then grow_acc n;
-  let c = ccc u in
+  let c = _ccc u in
   if c = 0 then n.acc.(n.last) <- u else
   begin
     let i = ref (n.last - 1) in
-    while (!i >= 0 && ccc (n.acc.(!i)) > c) do
+    while (!i >= 0 && _ccc (n.acc.(!i)) > c) do
       n.acc.(!i + 1) <- n.acc.(!i); decr i;                  (* shift right. *)
     done;
     n.acc.(!i + 1) <- u
@@ -180,7 +181,7 @@ let rec add n u =
     | d ->
         if d_compatibility d.(0) && not n.compat then ordered_add n u else
         begin
-          add n (d_uchar d.(0));
+          add n (_d_uchar d.(0));
           for i = 1 to Array.length d - 1 do add n d.(i) done
         end
     end
@@ -189,10 +190,10 @@ let compose n =                         (* canonical composition algorithm. *)
   let i = ref n.first in
   while (!i < n.last) do
     incr i;
-    let c = ccc n.acc.(!i) in
+    let c = _ccc n.acc.(!i) in
     try
       for j = !i - 1 downto n.first do
-        let c' = ccc n.acc.(j) in
+        let c' = _ccc n.acc.(j) in
         if c' = 0 then
           let u = _composite n.acc.(j) n.acc.(!i) in
           if u = ux_none then (* no composite => blocked *) raise Exit else
@@ -209,7 +210,7 @@ let compose n =                         (* canonical composition algorithm. *)
   done
 
 let flush_next n =
-  let ret = `Uchar n.acc.(n.first) in
+  let ret = `Uchar (Uchar.unsafe_of_int n.acc.(n.first)) in
   if n.first = n.last then (n.first <- 0; n.last <- -1) else
   (n.first <- n.first + 1);
   ret
@@ -217,6 +218,7 @@ let flush_next n =
 let flush_start n = if n.compose then compose n; flush_next n
 let add n = function
 | `Uchar u as uc ->
+    let u = Uchar.to_int u in
     begin match n.state with
     | Boundary ->
         if n.boundary u
@@ -237,15 +239,16 @@ let add n = function
     begin match n.state with
     | Flush ->
         if acc_empty n
-        then (n.state <- if is_end n then End else Boundary; `Await)
+        then (n.state <- if n.is_end then End else Boundary; `Await)
         else flush_next n
     | Start | Boundary | Acc -> `Await
     | End -> `End
     end
 | `End ->
+    n.is_end <- true;
     begin match n.state with
     | Boundary -> n.state <- End; (n.uc :> ret)
-    | Acc -> n.state <- Flush; n.uc <- `Uchar ux_eoi; flush_start n
+    | Acc -> n.state <- Flush; flush_start n
     | Start -> n.state <- End; `End
     | Flush -> err_exp_await `End
     | End -> err_ended `End
