@@ -2,10 +2,10 @@ The distribution contains generated data. If you want to contribute
 please hack your way directly via the source repository.
 
 For developing, you will need to install [uucd][uucd] and download a copy
-of the XML Unicode character database to an absolute `$DBPATH`. From
-the root directory of the repository type:
+of the XML Unicode character database to `support/ucd.xml` (this will be done
+automatically if the file doesn't exist). From the root directory of the
+repository type:
 
-    ln -s $DBPATH support/ucd.xml
     ocaml ./pkg/build_support.ml
 
 The result is in the file `src/uunf_data.ml`. It contains the data
