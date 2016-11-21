@@ -77,12 +77,7 @@ val add : t -> [ `Uchar of Uchar.t | `Await | `End ] -> ret
 
     {b Raises.} [Invalid_argument] if [`Uchar ] or [`End] is
     added directly after an [`Uchar] was returned by the normalizer
-    or if an [`Uchar] is added after [`End] was added.
-
-    {b Warning.} [add] deals with Unicode
-    {{:http://www.unicode.org/glossary/#unicode_scalar_value}
-    scalar values}. If you are handling foreign data you must assert
-    that before with {!is_scalar_value}. *)
+    or if an [`Uchar] is added after [`End] was added. *)
 
 val reset : t -> unit
 (** [reset n] resets the normalizer to a state equivalent to the
@@ -155,7 +150,7 @@ val composite : Uchar.t -> Uchar.t -> Uchar.t option
     The function {!create} returns a new normalizer for a given normal
     form:
 {[
-let nfd = Uunf.create `NFD;;
+let nfd = Uunf.create `NFD
 ]}
     To add characters to the sequence to normalize, call {!add} on
     [nfd] with [`Uchar _].  To end the sequence, call {!add} on [nfd]
