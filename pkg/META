@@ -1,6 +1,6 @@
 description = "Unicode text normalization for OCaml"
 version = "%%VERSION%%"
-requires = "bytes"
+requires = "bytes uchar"
 archive(byte) = "uunf.cma"
 archive(native) = "uunf.cmxa"
 plugin(byte) = "uunf.cma"
