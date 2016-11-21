@@ -17,22 +17,15 @@ let str_of_size s =
 
 (* Characters *)
 
-module Uchar = struct
-  let err_succ = "no successor"
-  let min = 0x0000
-  let max = 0x10FFFF
-  let min_surrogate = 0xD800
-  let max_surrogate = 0xDFFF
-  let is_hangul_syllabe u = 0xAC00 <= u && u <= 0xD7A3
-  let succ u =
-    if u = max then invalid_arg err_succ else
-    if u = min_surrogate - 1 then max_surrogate + 1 else
-    u + 1
+let is_hangul_syllabe u = 0xAC00 <= u && u <= 0xD7A3
 
-  let iter f =
-    for u = min to min_surrogate - 1 do f u done;
-    for u = max_surrogate + 1 to max do f u done
-end
+let iter_uchar_ints f =
+  let rec loop u =
+    let i = Uchar.to_int u in
+    if Uchar.equal u Uchar.max then f i else
+    (f i; loop (Uchar.succ u))
+  in
+  loop Uchar.min
 
 (* Compact maps from characters to booleans. *)
 
@@ -44,7 +37,7 @@ let bool_prop_maps prop =
     Uunf_tmapbool.set tm u b;
     Uunf_tmapbool.set fm u b;
   in
-  Uchar.iter add_uchar; tm, fm
+  iter_uchar_ints add_uchar; tm, fm
 
 let assert_bool_prop_maps prop tm fm =
   let assert_uchar u =
@@ -53,35 +46,35 @@ let assert_bool_prop_maps prop tm fm =
     if b <> Uunf_tmapbool.get tm u then fail ();
     if b <> Uunf_tmapbool.get fm u then fail ();
   in
-  Uchar.iter assert_uchar
+  iter_uchar_ints assert_uchar
 
 (* Compact maps from characters to bytes. *)
 
 let byte_prop_map ~default prop =
   let m = Uunf_tmapbyte.create default in
   let add_uchar u = Uunf_tmapbyte.set m u (prop u) in
-  Uchar.iter add_uchar; m
+  iter_uchar_ints add_uchar; m
 
 let assert_byte_prop_map prop m =
   let assert_uchar u =
     if (prop u) = Uunf_tmapbyte.get m u then () else
     failwith (str "byte prop map failure for U+%04X" u)
   in
-  Uchar.iter assert_uchar
+  iter_uchar_ints assert_uchar
 
 (* Compact maps from characters to arbitrary values. *)
 
 let prop_map ~default prop =
   let m = Uunf_tmap.create default in
   let add_uchar u = Uunf_tmap.set m u (prop u) in
-  Uchar.iter add_uchar; m
+  iter_uchar_ints add_uchar; m
 
 let assert_prop_map prop m =
   let assert_uchar u =
     if (prop u) = Uunf_tmap.get m u then () else
     failwith (str "prop map failure for U+%04X" u)
   in
-  Uchar.iter assert_uchar
+  iter_uchar_ints assert_uchar
 
 let ucd_get ucd u p pstr = match Uucd.cp_prop ucd u p with
 | None -> invalid_arg (str "no %s property for U+%04X" pstr u)

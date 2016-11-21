@@ -48,7 +48,7 @@ let pp_decomp ppf ucd =
     | `Self -> default
     | `Cps cps ->
         let t = Gen.ucd_get ucd u Uucd.decomposition_type "decomposition_type"in
-        if Gen.Uchar.is_hangul_syllabe u then begin
+        if Gen.is_hangul_syllabe u then begin
           if t <> `Can then invalid_arg (strf "hangul not canon decomp %X" u);
           default
         end else begin
@@ -91,12 +91,12 @@ let pp_compose ppf ucd =
         if Gen.ucd_get ucd u Uucd.full_composition_exclusion fce then () else
         let t = Gen.ucd_get ucd u Uucd.decomposition_type "decomposition_type"in
         if t <> `Can then () else
-        if Gen.Uchar.is_hangul_syllabe u then () else
+        if Gen.is_hangul_syllabe u then () else
         match cps with
         | [cp1; cp2] -> add_map cp1 cp2 u
         | _ -> invalid_arg (strf "cannot handle composition for %X" u);
   in
-  Gen.Uchar.iter add;
+  Gen.iter_uchar_ints add;
   let default = Uunf_tmap.nil in
   let max_comps = ref 0 in
   let prop u =
