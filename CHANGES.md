@@ -1,9 +1,13 @@
+v2.0.0 2016-11-23 Zagreb
+------------------------
 
+- Support for Unicode 9.0.0.
 - OCaml standard library `Uchar.t` support.
   - Removes and substitutes `type Uunf.uchar = int` by the (abstract)
     `Uchar.t` type. `Uchar.{of,to}_int` allows to recover the previous
     representation.
   - Removes `Uunf.is_scalar_value`. `Uchar.is_valid` can be used instead.
+- Safe string support.
 - Build depend on topkg.
 - Relicense from BSD3 to ISC.
 
