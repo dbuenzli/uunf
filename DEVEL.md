@@ -19,4 +19,4 @@ to the `test` directory this can simply done by:
     topkg build
     topkg test
  
-[uucd] http://erratique.ch/software/uucd
+[uucd]: http://erratique.ch/software/uucd
