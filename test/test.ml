@@ -4,6 +4,8 @@
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
+let uchar_dump ppf u = Format.fprintf ppf "U+%04X" (Uchar.to_int u)
+
 (* Checks that Uunf passes Unicode's Normalization Conformance tests and
    also performs other tests. *)
 
@@ -146,13 +148,13 @@ let test_conformance_non_decomposables decomps =
       let ul = [u] in
       Uunf.reset nc; Uunf.reset nd; Uunf.reset nkc; Uunf.reset nkd;
       if norm nc u <> ul then
-        fail "NFC: %a <> toNFC(%a)" Uchar.dump u Uchar.dump u;
+        fail "NFC: %a <> toNFC(%a)" uchar_dump u uchar_dump u;
       if norm nd u <> ul then
-        fail "NFD: %a <> toNFD(%a)" Uchar.dump u Uchar.dump u;
+        fail "NFD: %a <> toNFD(%a)" uchar_dump u uchar_dump u;
       if norm nkc u <> ul then
-        fail "NFKC: %a <> toNFKC(%a)" Uchar.dump u Uchar.dump u;
+        fail "NFKC: %a <> toNFKC(%a)" uchar_dump u uchar_dump u;
       if norm nkd u <> ul then
-        fail "NFKD: %a <> toNFKD(%a)" Uchar.dump u Uchar.dump u;
+        fail "NFKD: %a <> toNFKD(%a)" uchar_dump u uchar_dump u;
     end
   in
   (* For each unicode scalar value *)

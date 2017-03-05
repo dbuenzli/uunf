@@ -5,8 +5,9 @@
   ---------------------------------------------------------------------------*)
 
 type ret = [ `Uchar of Uchar.t | `End | `Await ]
+
 let pp_ret ppf v = match (v :> ret) with
-| `Uchar u -> Format.fprintf ppf "`Uchar %a" Uchar.dump u
+| `Uchar u -> Format.fprintf ppf "`Uchar U+%04X" (Uchar.to_int u)
 | `End -> Format.fprintf ppf "`End"
 | `Await -> Format.fprintf ppf "`Await"
 

@@ -17,6 +17,8 @@ let pp_malformed ppf bs =
   for i = 1 to l - 1 do pp ppf "@ %02X" (Char.code (bs.[i])) done;
   pp ppf ")@]@]"
 
+let pp_dump_uchar ppf u = Format.fprintf ppf "U+%04X" (Uchar.to_int u)
+
 let exec = Filename.basename Sys.executable_name
 let log f = Format.eprintf ("%s: " ^^ f ^^ "@?") exec
 
@@ -28,7 +30,7 @@ let log_malformed inf d bs =
 (* Output *)
 
 let uchar_dump ppf = function
-| `End -> () | `Uchar u -> pp ppf "%a@\n" Uchar.dump u
+| `End -> () | `Uchar u -> pp ppf "%a@\n" pp_dump_uchar u
 
 let uchar_encoder enc =
   let enc = match enc with `ISO_8859_1 | `US_ASCII -> `UTF_8
