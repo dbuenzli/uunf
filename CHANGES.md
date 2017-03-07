@@ -1,4 +1,6 @@
 
+v2.0.1 2016-03-07
+-----------------
 
 - OCaml 4.05.0 compatibility (removal of `Uchar.dump`).
 
