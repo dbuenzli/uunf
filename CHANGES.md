@@ -1,4 +1,7 @@
 
+- Fix regression of `Uucp.ccc` introduced by f4c0363 which went into
+  v2.0.{0,1}.
+
 v2.0.1 2016-03-07
 -----------------
 

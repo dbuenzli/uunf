@@ -195,6 +195,11 @@ let test_others () =
   test [0x0041; 0x007A; 0x0335; 0x0327; 0x0324; 0x0301; 0x0041] `NFC
        [0x0041; 0x017A; 0x0335; 0x0327; 0x0324; 0x0041]
 
+let test_ccc () =
+  assert (Uunf.ccc (Uchar.of_int 0x0020) = 0);
+  assert (Uunf.ccc (Uchar.of_int 0x0301) = 230);
+  ()
+
 let test inf =
   try
     let ok () = log "[DONE]\n" in
@@ -207,6 +212,8 @@ let test inf =
     ok (); log "Testing conformance of non-decomposable characters... ";
     test_conformance_non_decomposables decomps;
     ok (); log "Unicode normalization conformance tests passed!\n";
+    log "Testing Uunf.ccc";
+    test_ccc ();
     log "Making other tests... ";
     test_others ();
     ok (); log "Success!\n"

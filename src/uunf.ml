@@ -41,7 +41,7 @@ let nfd_boundary u = Uunf_tmapbool.get Uunf_data.nfd_boundary_map u
 let nfkc_boundary u = Uunf_tmapbool.get Uunf_data.nfkc_boundary_map u
 let nfkd_boundary u = Uunf_tmapbool.get Uunf_data.nfkd_boundary_map u
 let _ccc u = Uunf_tmapbyte.get Uunf_data.ccc_map u
-let ccc u = Uchar.to_int u
+let ccc u = _ccc (Uchar.to_int u)
 let decomp_prop u = Uunf_tmap.get Uunf_data.decomp_map u
 let compose_prop u = Uunf_tmap.get Uunf_data.compose_map u
 
