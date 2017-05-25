@@ -129,7 +129,6 @@ type t =
     mutable last : int;                  (* index of last code point in acc. *)
     mutable is_end : bool;}                      (* [true] if `End was seen. *)
 
-
 let create_acc () = Array.make 35 ux_none
 let create form  =
   let boundary, compat, compose = match form with
@@ -188,27 +187,27 @@ let rec add n u =
     end
 
 let compose n =                         (* canonical composition algorithm. *)
-  let i = ref n.first in
-  while (!i < n.last) do
-    incr i;
-    let c = _ccc n.acc.(!i) in
-    try
-      for j = !i - 1 downto n.first do
-        let c' = _ccc n.acc.(j) in
-        if c' = 0 then
-          let u = _composite n.acc.(j) n.acc.(!i) in
-          if u = ux_none then (* no composite => blocked *) raise Exit else
-          begin
-            n.acc.(j) <- u;
-            Array.blit n.acc (!i + 1) n.acc !i (n.last - !i);
-            decr i;
-            n.last <- n.last - 1
-          end
-        else
-        if c' >= c then (* blocked *) raise Exit
-      done
-    with Exit -> ()
-  done
+  let rec loop ~last_starter ~prev_ccc i =
+    if i > n.last then () else
+    match _composite n.acc.(last_starter) n.acc.(i) with
+    | u when u = ux_none ->
+        let ccc_i = _ccc n.acc.(i) in
+        let last_starter = if ccc_i = 0 then i else last_starter in
+        loop ~last_starter ~prev_ccc:ccc_i (i + 1)
+    | u ->
+        let ccc_i = _ccc n.acc.(i) in
+        match prev_ccc <> 0 && prev_ccc >= ccc_i with
+        | true -> loop ~last_starter ~prev_ccc:ccc_i (i + 1)
+        | false ->
+            n.acc.(last_starter) <- u;
+            Array.blit n.acc (i + 1) n.acc i (n.last - i);
+            n.last <- n.last - 1;
+            let prev_ccc = _ccc n.acc.(last_starter) in
+            loop ~last_starter ~prev_ccc (last_starter + 1)
+  in
+  let last_starter = n.first in
+  let prev_ccc = _ccc n.acc.(last_starter) in
+  loop ~last_starter ~prev_ccc (last_starter + 1)
 
 let flush_next n =
   let ret = `Uchar (Uchar.unsafe_of_int n.acc.(n.first)) in

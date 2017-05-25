@@ -1,4 +1,6 @@
 
+- Fix bug in canonical composition algorithm (used by NFC and NFKC forms).
+  Thanks to Stephen Dolan for the report.
 - Fix regression of `Uucp.ccc` introduced by f4c0363 which went into
   v2.0.{0,1}.
 
