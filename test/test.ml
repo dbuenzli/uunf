@@ -218,9 +218,9 @@ let test inf =
     ok (); log "Testing conformance of non-decomposable characters... ";
     test_conformance_non_decomposables decomps;
     ok (); log "Unicode normalization conformance tests passed!\n";
-    log "Testing Uunf.ccc";
+    log "Testing Uunf.ccc\n";
     test_ccc ();
-    log "Making other tests... ";
+    log "Making other tests...\n";
     test_others ();
     ok (); log "Success!\n"
   with Sys_error e -> log "%s\n" e; exit 1
