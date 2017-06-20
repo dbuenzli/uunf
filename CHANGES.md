@@ -1,11 +1,14 @@
+v10.0.0 2017-06-20 Cambridge (UK)
+---------------------------------
 
+- Unicode 10.0.0 support
 - Fix bug in canonical composition algorithm (used by NFC and NFKC forms).
   Thanks to Stephen Dolan for the report.
 - Fix regression of `Uucp.ccc` introduced by f4c0363 which went into
   v2.0.{0,1}.
 
-v2.0.1 2016-03-07
------------------
+v2.0.1 2016-03-07 La Forclaz (VS)
+---------------------------------
 
 - OCaml 4.05.0 compatibility (removal of `Uchar.dump`).
 
