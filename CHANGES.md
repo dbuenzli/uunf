@@ -1,3 +1,8 @@
+
+
+- Fix bug when normalizer flushes at the end of stream: a spurious
+  `Await` was returned before the final `End`.
+
 v10.0.0 2017-06-20 Cambridge (UK)
 ---------------------------------
 

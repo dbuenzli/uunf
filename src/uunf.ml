@@ -238,9 +238,9 @@ let add n = function
 | `Await ->
     begin match n.state with
     | Flush ->
-        if acc_empty n
-        then (n.state <- if n.is_end then End else Boundary; `Await)
-        else flush_next n
+        if not (acc_empty n) then flush_next n else
+        if n.is_end then (n.state <- End; `End) else
+        (n.state <- Boundary; `Await)
     | Start | Boundary | Acc -> `Await
     | End -> `End
     end

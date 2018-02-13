@@ -201,6 +201,17 @@ let test_others () =
   test [0xC100; 0x20D2; 0x11C1; 0x11C1] `NFC [0xC100; 0x20D2; 0x11C1; 0x11C1];
   ()
 
+let test_flushing_end_seq () =
+  let n = Uunf.create `NFKC in
+  let uchar u = `Uchar (Uchar.of_int u) in
+  if Uunf.add n (uchar 0x2105) <> `Await then fail "";
+  if Uunf.add n `Await <> `Await then fail "";
+  if Uunf.add n `End <> (uchar 0x0063) then fail "";
+  if Uunf.add n `Await <> (uchar 0x002F) then fail "";
+  if Uunf.add n `Await <> (uchar 0x006F) then fail "";
+  if Uunf.add n `Await <> `End then fail "";
+  ()
+
 let test_ccc () =
   assert (Uunf.ccc (Uchar.of_int 0x0020) = 0);
   assert (Uunf.ccc (Uchar.of_int 0x0301) = 230);
@@ -222,6 +233,8 @@ let test inf =
     test_ccc ();
     log "Making other tests...\n";
     test_others ();
+    log "Testing flushing end of stream\n";
+    test_flushing_end_seq ();
     ok (); log "Success!\n"
   with Sys_error e -> log "%s\n" e; exit 1
 
