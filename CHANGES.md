@@ -1,5 +1,5 @@
 
-
+- Unicode 11.0.0 support.
 - Fix bug when normalizer flushes at the end of stream: a spurious
   `Await` was returned before the final `End`.
 
