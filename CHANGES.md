@@ -1,3 +1,5 @@
+v11.0.0 2018-06-06 Lausanne
+---------------------------
 
 - Unicode 11.0.0 support.
 - Fix bug when normalizer flushes at the end of stream: a spurious
