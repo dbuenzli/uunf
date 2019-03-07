@@ -9,7 +9,7 @@ let massage () =
 
 let distrib =
   (* FIXME OPAMv2, move this to an x-unicode-version field in the opam file. *)
-  let watermarks = ("UNICODE_VERSION", `String "11.0.0") :: Pkg.watermarks in
+  let watermarks = ("UNICODE_VERSION", `String "12.0.0") :: Pkg.watermarks in
   let exclude_paths () = Pkg.exclude_paths () >>| fun ps -> ("support" :: ps) in
   Pkg.distrib ~watermarks ~massage ~exclude_paths ()
 
