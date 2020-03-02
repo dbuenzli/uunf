@@ -1,5 +1,6 @@
 true : bin_annot, safe_string, package(bytes), package(uchar)
 
+<_b0> : -traverse
 <support> : include
 <support/gen*{ml,mli,byte,native}> : package(xmlm), package(uucd)
 
