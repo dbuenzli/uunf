@@ -153,8 +153,8 @@ let cmd =
     `S "OPTIONS";
     `S "EXIT STATUS";
     `P "$(tname) exits with one of the following values:";
-    `I ("0", "no error occured");
-    `I ("1", "a command line parsing error occured");
+    `I ("0", "no error occurred");
+    `I ("1", "a command line parsing error occurred");
     `I ("2", "the input text was malformed");
     `S "BUGS";
     `P "This program is distributed with the Uunf OCaml library.
