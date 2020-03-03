@@ -27,7 +27,7 @@ let process inf norm =
   | None -> ()
   | Some fn ->
       try
-        let oc = if fn = "-" then stdout else Pervasives.open_out fn in
+        let oc = if fn = "-" then stdout else open_out fn in
         try
           let ppf = Format.formatter_of_out_channel oc in
           pp ppf ucd;
