@@ -1,6 +1,6 @@
 
 
-
+- Unicode 13.0.0 support.
 - Require OCaml >= 4.03.0.
 
 v12.0.0 2019-03-08 La Forclaz (VS)

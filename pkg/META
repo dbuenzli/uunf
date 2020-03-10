@@ -7,6 +7,7 @@ plugin(byte) = "uunf.cma"
 plugin(native) = "uunf.cmxs"
 
 package "string" (
+  directory = "string"
   description = "Unicode text normalization on UTF-X OCaml strings"
   version = "%%VERSION%%"
   requires = "uunf uutf"
