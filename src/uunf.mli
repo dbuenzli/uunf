@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2012 The uunf programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** Unicode text normalization.
@@ -17,8 +16,7 @@
     Consult the {{!basics}basics}, {{!limits}limitations} and
     {{!examples}examples} of use.
 
-    {e %%VERSION%% — Unicode version %%UNICODE_VERSION%% —
-       {{:%%PKG_HOMEPAGE%% }homepage}}
+    {e Unicode version %%UNICODE_VERSION%%}
 
     {3 References}
     {ul

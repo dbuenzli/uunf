@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The uunf programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** Unicode text normalization on UTF-X OCaml strings.
@@ -11,8 +10,7 @@
     {b Warning.} All these function silently replace malformed encoded Unicode
     data by a {!Uutf.u_rep} character.
 
-    {e %%VERSION%% — Unicode version %%UNICODE_VERSION%% —
-       {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    {e Unicode version %%UNICODE_VERSION%%} *)
 
 (** {1:norm Normalize} *)
 
