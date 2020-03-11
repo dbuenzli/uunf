@@ -1,6 +1,6 @@
 Uunf — Unicode text normalization for OCaml
 -------------------------------------------------------------------------------
-%%VERSION%% — Unicode version %%UNICODE_VERSION%%
+%%VERSION%%
 
 Uunf is an OCaml library for normalizing Unicode text. It supports all
 Unicode [normalization forms][nf]. The library is independent from any
