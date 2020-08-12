@@ -28,7 +28,7 @@ let () =
        Pkg.bin ~cond:(uutf && cmdliner) "test/unftrip";
        Pkg.test "test/test" ~args:(Cmd.v "test/NormalizationTest.txt");
        Pkg.test ~cond:uutf "test/test_string";
-       Pkg.test "test/examples";
+       Pkg.test ~cond:uutf "test/examples";
        Pkg.doc "doc/index.mld" ~dst:"odoc-pages/index.mld";
        Pkg.doc "DEVEL.md";
        Pkg.doc "test/examples.ml"; ]
