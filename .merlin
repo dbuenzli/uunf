@@ -1,6 +1,7 @@
-PKG uucd cmdliner uutf
+PKG uucd cmdliner uutf b0.kit
 S src
 S data
 S test
 S support
+B _b0/b/**
 B _build/**
