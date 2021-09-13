@@ -10,7 +10,7 @@ license: ["ISC"]
 tags: ["unicode" "text" "normalization" "org:erratique"]
 depends: ["ocaml" {>= "4.03.0"}
           "xmlm" {dev}
-          "uucd" {dev}
+          "uucd" {dev & >= "13.0.0" & < 14.0.0}
           "ocamlfind" {build}
           "ocamlbuild" {build}
           "topkg" {build & >= "1.0.3"}]
