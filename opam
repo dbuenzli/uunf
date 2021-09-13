@@ -11,7 +11,8 @@ tags: ["unicode" "text" "normalization" "org:erratique"]
 depends: ["ocaml" {>= "4.03.0"}
           "ocamlfind" {build}
           "ocamlbuild" {build}
-          "topkg" {build & >= "1.0.3"}]
+          "topkg" {build & >= "1.0.3"}
+          "uucd" {dev & >= "14.0.0" & < "15.0.0"}]
 depopts: ["uutf"
           "cmdliner"]
 conflicts: ["uutf" {< "1.0.0"}]

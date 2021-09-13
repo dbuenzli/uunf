@@ -2,7 +2,7 @@ true : bin_annot, safe_string
 
 <_b0> : -traverse
 <support> : include
-<support/gen*{ml,mli,byte,native}> : package(xmlm), package(uucd)
+<support/gen*{ml,mli,byte,native}> : package(uucd)
 
 <src> : include
 <src/uunf_string*> : package(uutf)
