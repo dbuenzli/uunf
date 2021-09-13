@@ -62,10 +62,15 @@ let size m = match m.l0 with
     done;
     !size
 
-let dump ppf m =
+let iter_blobs i m = Array.(iter (iter i)) m.l0
+
+let dump_pp pp_v ppf m =
   let open Uunf_fmt in
-  record ["default", bool; "l0", string_XN |> array_N |> array]
+  record ["default", bool; "l0", pp_v |> array_N |> array]
     ppf m.default m.l0
+
+let pp_v = Uunf_fmt.string_XN
+let dump = dump_pp pp_v
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2012 The uunf programmers

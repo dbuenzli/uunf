@@ -5,6 +5,24 @@
 
 let strf = Printf.sprintf
 let pp = Format.fprintf
+let str = Format.asprintf
+
+(* Structure sharing *)
+
+let intern (type a) ?eqh iter pp_v ppf x =
+  let module H = Hashtbl.Make (struct
+    type t = a
+    let equal, hash = match eqh with Some fg -> fg | _ -> (=), Hashtbl.hash
+  end) in
+  let t = H.create 23 and n = ref 0 in
+  x |> iter (fun v -> if not (H.mem t v) then begin
+    let name = str "v%03d" !n in
+    H.add t v name; incr n;
+    pp ppf "@[<2>let %s =@ %a@]@\n" name pp_v v
+  end);
+  (fun ppf v -> match H.find_opt t v with
+  | Some name -> pp ppf "%s" name
+  | None -> pp_v ppf v)
 
 (* Normalization properties. *)
 
@@ -25,7 +43,9 @@ let pp_boundary nf ucd ppf nf_quick_check =
     (Gen.str_of_size fm_size);
   Gen.log " Using map with default %b.\n\n" (not use_fm);
   let m = if use_fm then fm else tm in
-  pp ppf "  @[<2>let %s_boundary_map =@ %a@]@\n@\n" nf Uunf_tmapbool.dump m;
+  let pp_v = intern Uunf_tmapbool.iter_blobs Uunf_tmapbool.pp_v ppf m in
+  pp ppf "  @[<2>let %s_boundary_map =@ %a@]@\n@\n"
+    nf (Uunf_tmapbool.dump_pp pp_v) m;
   ()
 
 let pp_ccc ppf ucd =
@@ -35,7 +55,9 @@ let pp_ccc ppf ucd =
   let t_size = Uunf_tmapbyte.size m in
   Gen.log ", asserting data.\n"; Gen.assert_byte_prop_map prop m;
   Gen.log " trie map size: %s\n\n" (Gen.str_of_size t_size);
-  pp ppf "  @[<2>let ccc_map =@ %a@]@\n@\n" Uunf_tmapbyte.dump m;
+  let pp_v = intern Uunf_tmapbyte.iter_blobs Uunf_tmapbyte.pp_v ppf m in
+  pp ppf "  @[<2>let ccc_map =@ %a@]@\n@\n"
+    (Uunf_tmapbyte.dump_pp pp_v) m;
   ()
 
 let pp_decomp ppf ucd =
