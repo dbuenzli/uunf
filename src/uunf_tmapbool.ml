@@ -62,32 +62,10 @@ let size m = match m.l0 with
     done;
     !size
 
-let pp = Format.fprintf
 let dump ppf m =
-  pp ppf "@,{ default =@ %b;@, l0 =@ " m.default;
-  begin match m.l0 with
-  | [||] -> pp ppf "nil"
-  | l0 ->
-      pp ppf "@,[|@,";
-      for i = 0 to Array.length l0 - 1 do match l0.(i) with
-      | [||] -> pp ppf "@,nil;@,"
-      | l1 ->
-          pp ppf "@,[|@,";
-          for j = 0 to Array.length l1 - 1 do match l1.(j) with
-          | "" -> pp ppf "@,snil;@,"
-          | l2 ->
-              pp ppf "@,\"";
-              for k = 0 to String.length l2 - 1 do
-                if k mod 16 = 0 && k > 0 then pp ppf "\\@\n ";
-                pp ppf "\\x%02X" (Char.code l2.[k])
-              done;
-              pp ppf "\";@,";
-          done;
-          pp ppf "|];"
-      done;
-      pp ppf "|]"
-  end;
-  pp ppf "@,}"
+  let open Uunf_fmt in
+  record ["default", bool; "l0", string_XN |> array_N |> array]
+    ppf m.default m.l0
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2012 The uunf programmers
