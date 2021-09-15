@@ -1,4 +1,5 @@
 opam-version: "2.0"
+version: "14.0.0~dev"
 synopsis: """Unicode text normalization for OCaml"""
 maintainer: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
 authors: ["The uunf programmers"]
@@ -12,7 +13,7 @@ depends: ["ocaml" {>= "4.03.0"}
           "ocamlfind" {build}
           "ocamlbuild" {build}
           "topkg" {build & >= "1.0.3"}
-          "uucd" {dev & >= "14.0.0" & < "15.0.0"}]
+          "uucd" {dev & >= "14.0.0~~" & < "15.0.0~~"}]
 depopts: ["uutf"
           "cmdliner"]
 conflicts: ["uutf" {< "1.0.0"}]
