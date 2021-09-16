@@ -91,6 +91,7 @@ let pp_decomp ppf ucd =
   in
   Gen.log ", asserting data.\n"; Gen.assert_prop_map prop m;
   Gen.log " trie map size: %s\n\n" (Gen.str_of_size t_size);
+  let pp_decomp = intern Uunf_tmap.iter_values pp_decomp ppf m in
   pp ppf "@[<2>let decomp_map =@ %a@]@\n@\n" (Uunf_tmap.dump pp_decomp) m;
   ()
 
