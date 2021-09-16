@@ -33,8 +33,6 @@ let set m u v =
   if m.l0.(i).(j) == nil then m.l0.(i).(j) <- Array.make l2_size m.default;
   m.l0.(i).(j).(u land l2_mask) <- v
 
-let iter_values i m = Array.(iter (iter (iter i))) m.l0
-
 let size v_size m = match m.l0 with
 | [||] -> 3 + 1 + v_size m.default
 | l0 ->
