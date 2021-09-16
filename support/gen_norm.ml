@@ -44,7 +44,7 @@ let pp_boundary nf ucd ppf nf_quick_check =
   Gen.log " Using map with default %b.\n\n" (not use_fm);
   let m = if use_fm then fm else tm in
   let pp_v = intern Uunf_tmapbool.iter_blobs Uunf_tmapbool.pp_v ppf m in
-  pp ppf "  @[<2>let %s_boundary_map =@ %a@]@\n@\n"
+  pp ppf "@[<2>let %s_boundary_map =@ %a@]@\n@\n"
     nf (Uunf_tmapbool.dump_pp pp_v) m;
   ()
 
@@ -56,7 +56,7 @@ let pp_ccc ppf ucd =
   Gen.log ", asserting data.\n"; Gen.assert_byte_prop_map prop m;
   Gen.log " trie map size: %s\n\n" (Gen.str_of_size t_size);
   let pp_v = intern Uunf_tmapbyte.iter_blobs Uunf_tmapbyte.pp_v ppf m in
-  pp ppf "  @[<2>let ccc_map =@ %a@]@\n@\n"
+  pp ppf "@[<2>let ccc_map =@ %a@]@\n@\n"
     (Uunf_tmapbyte.dump_pp pp_v) m;
   ()
 
@@ -91,7 +91,7 @@ let pp_decomp ppf ucd =
   in
   Gen.log ", asserting data.\n"; Gen.assert_prop_map prop m;
   Gen.log " trie map size: %s\n\n" (Gen.str_of_size t_size);
-  pp ppf "  @[<2>let decomp_map =@ %a@]@\n@\n" (Uunf_tmap.dump pp_decomp) m;
+  pp ppf "@[<2>let decomp_map =@ %a@]@\n@\n" (Uunf_tmap.dump pp_decomp) m;
   ()
 
 module Cpmap = Uucd.Cpmap
@@ -145,18 +145,18 @@ let pp_compose ppf ucd =
   Gen.log " trie map size: %s\n" (Gen.str_of_size t_size);
   Gen.log " max num. of possible composition for a base char: %d\n\n"
     !max_comps;
-  pp ppf "  @[<2>let compose_map =@ %a@]@\n@\n" (Uunf_tmap.dump pp_d) m;
+  pp ppf "@[<2>let compose_map =@ %a@]@\n@\n" (Uunf_tmap.dump pp_d) m;
   ()
 
 let pp_norms ppf ucd =
-  pp ppf "  open Uunf_tmapbool;;@\n@\n";
+  pp ppf "open Uunf_tmapbool;;@\n@\n";
   pp_boundary "nfc" ucd ppf Uucd.nfc_quick_check;
   pp_boundary "nfd" ucd ppf Uucd.nfd_quick_check;
   pp_boundary "nfkc" ucd ppf Uucd.nfkc_quick_check;
   pp_boundary "nfkd" ucd ppf Uucd.nfkd_quick_check;
-  pp ppf "  open Uunf_tmapbyte;;@\n@\n";
+  pp ppf "open Uunf_tmapbyte;;@\n@\n";
   pp_ccc ppf ucd;
-  pp ppf "  open Uunf_tmap;;@\n@\n";
+  pp ppf "open Uunf_tmap;;@\n@\n";
   pp_decomp ppf ucd;
   pp_compose ppf ucd;
   ()
