@@ -83,7 +83,11 @@ let default =
         "topkg", {|build & >= "1.0.3"|};
         "uucd", {|dev & >= "14.0.0" & < "15.0.0"|};
       ]
-
+    |> add B0_opam.Meta.file_addendum
+      [ `Field ("post-messages", `L (true, [
+            `S "If the build fails with \"ocamlopt.opt got signal and \
+                exited\", issue 'ulimit -s unlimited' and retry.";
+            `Raw {|{failure & (arch = "ppc64" | arch = "arm64")}|}]))]
   in
   B0_pack.v "default" ~doc:"uunf package" ~meta ~locked:true @@
   B0_unit.list ()
