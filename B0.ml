@@ -1,6 +1,9 @@
 open B0_kit.V000
 open Result.Syntax
 
+let unicode_version = 15, 0, 0, None (* Adjust on new releases *)
+let next_major = let maj, _, _, _ = unicode_version in (maj + 1), 0, 0, None
+
 (* OCaml library names *)
 
 let uunf = B0_ocaml.libname "uunf"
@@ -37,7 +40,13 @@ let unftrip =
 
 let test =
   let srcs = Fpath.[`File (v "test/test.ml")] in
-  let meta = B0_meta.(empty |> tag test) in
+  (* FIXME b0, this is not so good. *)
+  let scope_dir b u = Fut.return (B0_build.scope_dir b u) in
+  let meta =
+    B0_meta.(empty
+             |> tag test
+             |> add B0_unit.Action.exec_cwd scope_dir)
+  in
   let requires = [ uunf ] in
   B0_ocaml.exe "test" ~doc:"Test normalization" ~srcs ~meta ~requires
 
@@ -52,6 +61,22 @@ let examples =
   let meta = B0_meta.(empty |> tag test) in
   let requires = [uutf; uunf] in
   B0_ocaml.exe "examples" ~doc:"Examples" ~srcs ~meta ~requires
+
+(* Cmdlets *)
+
+let download_tests =
+  B0_cmdlet.v "download-tests" ~doc:"Download the UCD normalization tests" @@
+  fun env _args -> B0_cmdlet.exit_of_result @@
+  let test_uri =
+    Fmt.str "http://www.unicode.org/Public/%s/ucd/NormalizationTest.txt"
+      (String.of_version unicode_version)
+  in
+  let test_file = Fpath.v "test/NormalizationTest.txt" in
+  let test_file = B0_cmdlet.in_scope_dir env test_file in
+  let stdout = Os.Cmd.out_file ~force:true ~make_path:true test_file in
+  let* curl = Os.Cmd.get Cmd.(atom "curl" % "-f" % "-#" % "-S") in
+  Log.app (fun m -> m "Downloading %s" test_uri);
+  Os.Cmd.run Cmd.(curl % test_uri) ~stdout
 
 (* Packs *)
 
@@ -74,13 +99,16 @@ let default =
          "--with-cmdliner" "%{cmdliner:installed}%" ]]|}
     |> tag B0_opam.tag
     |> add B0_opam.Meta.depopts [ "uutf", ""; "cmdliner", ""]
-    |> add B0_opam.Meta.conflicts [ "uutf", {|< "1.0.0"|}]
+    |> add B0_opam.Meta.conflicts
+      [ "uutf", {|< "1.0.0"|};
+        "cmdliner", {|< "1.1.0"|}]
     |> add B0_opam.Meta.depends
       [ "ocaml", {|>= "4.03.0"|};
         "ocamlfind", {|build|};
         "ocamlbuild", {|build|};
         "topkg", {|build & >= "1.0.3"|};
-        "uucd", {|dev & >= "14.0.0" & < "15.0.0"|};
+        "uucd", Fmt.str {|dev & >= "%s" & < "%s"|}
+        (String.of_version unicode_version) (String.of_version next_major)
       ]
     |> add B0_opam.Meta.file_addendum
       [ `Field ("post-messages", `L (true, [

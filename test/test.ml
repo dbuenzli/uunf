@@ -245,7 +245,7 @@ let main () =
  \ http://www.unicode.org/Public/%%UNICODEVERSION%%/ucd/NormalizationTest.txt\n\
     Options:" (Filename.basename Sys.executable_name)
   in
-  let inf = ref "-" in
+  let inf = ref "test/NormalizationTest.txt" in
   let err_inf () = raise (Arg.Bad "only one file can be specified") in
   let set_inf f = if !inf <> "-" then err_inf ()  else inf := f in
   let options = [] in
