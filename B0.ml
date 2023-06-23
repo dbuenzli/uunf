@@ -74,7 +74,7 @@ let download_tests =
   let test_file = Fpath.v "test/NormalizationTest.txt" in
   let test_file = B0_cmdlet.in_scope_dir env test_file in
   let stdout = Os.Cmd.out_file ~force:true ~make_path:true test_file in
-  let* curl = Os.Cmd.get Cmd.(atom "curl" % "-f" % "-#" % "-S") in
+  let* curl = Os.Cmd.get Cmd.(arg "curl" % "-f" % "-#" % "-S") in
   Log.app (fun m -> m "Downloading %s" test_uri);
   Os.Cmd.run Cmd.(curl % test_uri) ~stdout
 

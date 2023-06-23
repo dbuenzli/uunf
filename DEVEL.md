@@ -14,7 +14,7 @@ normalization forms. This file is ignored by git.
 
 [uucd]: http://erratique.ch/software/uucd
 
-# New unicod release 
+# New unicode release
 
 For now proceed as above to generate the data filees using an
 up-to-date [uucd] package.
@@ -22,7 +22,7 @@ up-to-date [uucd] package.
 Update the opam file with: 
 
 ```
-b0 cmd .opam.file > opam
+b0 -- .opam.file > opam
 ```
 
 # Reference tests 
@@ -30,10 +30,10 @@ b0 cmd .opam.file > opam
 To download the reference normalization tests for the version
 mentioned in `B0.ml` to the `test` directory issue:
 
-    b0 cmd download-tests
+    b0 -- download-tests
 
 You can then check them with: 
 
-    b0 -a test
+    b0 -- test
  
 
