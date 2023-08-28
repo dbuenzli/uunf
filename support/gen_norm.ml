@@ -148,7 +148,16 @@ let pp_compose ppf ucd =
   pp ppf "@[<2>let compose_map =@ %a@]@\n@\n" (Uunf_tmap.dump pp_d) m;
   ()
 
+let pp_version ppf ucd =
+  let version = match String.split_on_char ' ' ucd.Uucd.description with
+  | [tok] -> tok
+  | [_; tok] -> tok
+  | _ -> ucd.Uucd.description
+  in
+  pp ppf "@[<2>let unicode_version = \"%s\"@]@\n@\n" version
+
 let pp_norms ppf ucd =
+  pp_version ppf ucd;
   pp ppf "open Uunf_tmapbool;;@\n@\n";
   pp_boundary "nfc" ucd ppf Uucd.nfc_quick_check;
   pp_boundary "nfd" ucd ppf Uucd.nfd_quick_check;

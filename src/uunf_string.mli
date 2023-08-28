@@ -8,9 +8,7 @@
     {!Uunf} functions acting directly on UTF-X encoded OCaml strings.
 
     {b Warning.} All these function silently replace malformed encoded Unicode
-    data by a {!Stdlib.Uchar.rep} character.
-
-    {e Unicode version %%UNICODE_VERSION%%} *)
+    data by a {!Stdlib.Uchar.rep} character. *)
 
 (** {1:norm Normalize} *)
 

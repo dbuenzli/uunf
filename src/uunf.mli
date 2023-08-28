@@ -16,8 +16,6 @@
     Consult the {{!basics}basics}, {{!limits}limitations} and
     {{!examples}examples} of use.
 
-    {e Unicode version %%UNICODE_VERSION%%}
-
     {3 References}
     {ul
     {- The Unicode Consortium.

@@ -5,6 +5,8 @@
 
 (* WARNING do not edit. This file was automatically generated. *)
 
+let unicode_version = "15.0.0"
+
 open Uunf_tmapbool;;
 
 let v000 = snil

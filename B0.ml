@@ -161,8 +161,7 @@ let default =
         (String.of_version unicode_version) (String.of_version next_major)
       ]
     |> add B0_opam.Meta.file_addendum
-      [ `Field ("x-unicode-version", `S (String.of_version unicode_version));
-        `Field ("post-messages", `L (true, [
+      [ `Field ("post-messages", `L (true, [
             `S "If the build fails with \"ocamlopt.opt got signal and \
                 exited\", issue 'ulimit -s unlimited' and retry.";
             `Raw {|{failure & (arch = "ppc64" | arch = "arm64")}|}]))]
