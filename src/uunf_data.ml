@@ -5,7 +5,7 @@
 
 (* WARNING do not edit. This file was automatically generated. *)
 
-let unicode_version = "15.0.0"
+let unicode_version = "15.1.0"
 
 open Uunf_tmapbool;;
 
