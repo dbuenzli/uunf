@@ -3,22 +3,17 @@
 #require "topkg"
 open Topkg
 
-let massage () =
-  let ocaml = Conf.tool "ocaml" `Build_os in
-  OS.Cmd.run Cmd.(ocaml % "pkg/build_support.ml")
-
 let distrib =
-  (* FIXME OPAMv2, move this to an x-unicode-version field in the opam file. *)
+  (* TODO move distrib to b0 *)
   let watermarks = ("UNICODE_VERSION", `String "15.0.0") :: Pkg.watermarks in
-  let exclude_paths () = Pkg.exclude_paths () >>| fun ps -> ("support" :: ps) in
-  Pkg.distrib ~watermarks ~massage ~exclude_paths ()
+  Pkg.distrib ~watermarks ()
 
 let uutf = Conf.with_pkg "uutf"
 let cmdliner = Conf.with_pkg "cmdliner"
 
 let () =
   let opams =
-    [Pkg.opam_file "opam" ~lint_deps_excluding:(Some ["xmlm"; "uucd"])]
+    [Pkg.opam_file "opam" ~lint_deps_excluding:(Some ["b0"; "xmlm"; "uucd"])]
   in
   Pkg.describe "uunf" ~opams ~distrib @@ fun c ->
   let uutf = Conf.value c uutf in
@@ -30,5 +25,4 @@ let () =
        Pkg.test ~cond:uutf "test/test_string";
        Pkg.test ~cond:uutf "test/examples";
        Pkg.doc "doc/index.mld" ~dst:"odoc-pages/index.mld";
-       Pkg.doc "DEVEL.md";
        Pkg.doc "test/examples.ml"; ]

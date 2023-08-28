@@ -6,11 +6,14 @@ let next_major = let maj, _, _, _ = unicode_version in (maj + 1), 0, 0, None
 
 (* OCaml library names *)
 
+let uutf = B0_ocaml.libname "uutf"
+
+let xmlm = B0_ocaml.libname "xmlm"
+let uucd = B0_ocaml.libname "uucd"
+let cmdliner = B0_ocaml.libname "cmdliner"
+
 let uunf = B0_ocaml.libname "uunf"
 let uunf_string = B0_ocaml.libname "uunf.string"
-
-let uutf = B0_ocaml.libname "uutf"
-let cmdliner = B0_ocaml.libname "cmdliner"
 
 (* Libraries *)
 
@@ -29,6 +32,23 @@ let uunf_string_lib =
   let requires = [uunf; uutf] in
   B0_ocaml.lib uunf_string ~doc:"The uunf.string library" ~srcs ~requires
 
+(* Data generation. *)
+
+let generate_data =
+  let srcs = [ `Dir (Fpath.v "support");
+               `File (Fpath.v "src/uunf_tmapbool.ml");
+               `File (Fpath.v "src/uunf_tmapbyte.ml");
+               `File (Fpath.v "src/uunf_tmap.ml");
+               `File (Fpath.v "src/uunf_fmt.ml")]
+  in
+  let requires = [xmlm; uucd] in
+  let meta =
+    let scope_dir b u = Fut.return (B0_build.scope_dir b u) in
+    B0_meta.(empty |> add B0_unit.Action.exec_cwd scope_dir)
+  in
+  let doc = "uunf_data.ml generator" in
+  B0_ocaml.exe "generate-data" ~doc ~srcs ~requires ~meta
+
 (* Tools *)
 
 let unftrip =
@@ -41,8 +61,8 @@ let unftrip =
 let test =
   let srcs = Fpath.[`File (v "test/test.ml")] in
   (* FIXME b0, this is not so good. *)
-  let scope_dir b u = Fut.return (B0_build.scope_dir b u) in
   let meta =
+    let scope_dir b u = Fut.return (B0_build.scope_dir b u) in
     B0_meta.(empty
              |> tag test
              |> add B0_unit.Action.exec_cwd scope_dir)
@@ -64,19 +84,48 @@ let examples =
 
 (* Cmdlets *)
 
+let uc_base = "http://www.unicode.org/Public"
+
+let unzip () = Os.Cmd.get (Cmd.arg "unzip")
+let curl () =
+  Os.Cmd.get @@
+  Cmd.(arg "curl" % "--fail" % "--show-error" % "--progress-bar" % "--location")
+
+let show_version =
+  B0_cmdlet.v "unicode-version" ~doc:"Show supported unicode version" @@
+  fun env _args -> B0_cmdlet.exit_of_result @@
+  (Log.app (fun m -> m "%s" (String.of_version unicode_version));
+   Ok ())
+
 let download_tests =
   B0_cmdlet.v "download-tests" ~doc:"Download the UCD normalization tests" @@
   fun env _args -> B0_cmdlet.exit_of_result @@
-  let test_uri =
-    Fmt.str "http://www.unicode.org/Public/%s/ucd/NormalizationTest.txt"
-      (String.of_version unicode_version)
-  in
+  let version = String.of_version unicode_version in
+  let test_uri = Fmt.str "%s/%s/ucd/NormalizationTest.txt" uc_base version in
   let test_file = Fpath.v "test/NormalizationTest.txt" in
   let test_file = B0_cmdlet.in_scope_dir env test_file in
   let stdout = Os.Cmd.out_file ~force:true ~make_path:true test_file in
-  let* curl = Os.Cmd.get Cmd.(arg "curl" % "-f" % "-#" % "-S") in
-  Log.app (fun m -> m "Downloading %s" test_uri);
+  let* curl = curl () in
+  Log.app (fun m ->
+      m "@[<v>Downloading %s@,to %a@]" test_uri Fpath.pp test_file);
   Os.Cmd.run Cmd.(curl % test_uri) ~stdout
+
+let download_ucdxml =
+  B0_cmdlet.v "download-ucdxml" ~doc:"Download the ucdxml" @@
+  fun env _args -> B0_cmdlet.exit_of_result @@
+  let version = String.of_version unicode_version in
+  let ucd_uri = Fmt.str "%s/%s/ucdxml/ucd.all.grouped.zip" uc_base version in
+  let ucd_file = Fpath.v "support/ucd.xml" in
+  let ucd_file = B0_cmdlet.in_scope_dir env ucd_file in
+  let* curl = curl () and* unzip = unzip () in
+  Result.join @@ Os.File.with_tmp_fd @@ fun tmpfile tmpfd ->
+  Log.app (fun m ->
+      m "@[<v>Downloading %s@,to %a@]" ucd_uri Fpath.pp ucd_file);
+  let stdout = Os.Cmd.out_fd ~close:true tmpfd in
+  let* () = Os.Cmd.run Cmd.(curl % ucd_uri) ~stdout in
+  let stdout = Os.Cmd.out_file ~force:true ~make_path:true ucd_file in
+  let* () = Os.Cmd.run Cmd.(unzip % "-p" %% path tmpfile) ~stdout in
+  Ok ()
 
 (* Packs *)
 
@@ -107,11 +156,13 @@ let default =
         "ocamlfind", {|build|};
         "ocamlbuild", {|build|};
         "topkg", {|build & >= "1.0.3"|};
+        "b0", {|dev & >= "0.0.5" |};
         "uucd", Fmt.str {|dev & >= "%s" & < "%s"|}
         (String.of_version unicode_version) (String.of_version next_major)
       ]
     |> add B0_opam.Meta.file_addendum
-      [ `Field ("post-messages", `L (true, [
+      [ `Field ("x-unicode-version", `S (String.of_version unicode_version));
+        `Field ("post-messages", `L (true, [
             `S "If the build fails with \"ocamlopt.opt got signal and \
                 exited\", issue 'ulimit -s unlimited' and retry.";
             `Raw {|{failure & (arch = "ppc64" | arch = "arm64")}|}]))]

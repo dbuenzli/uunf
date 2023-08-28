@@ -1,39 +1,44 @@
-The distribution contains generated data. If you want to contribute
-please hack your way directly via the source repository.
+# New Unicode release
 
-For developing, you will need to install [uucd][uucd] and download a copy
-of the XML Unicode character database to `support/ucd.xml` (this will be done
-automatically if the file doesn't exist). From the root directory of the
-repository type:
+The file `src/uunf_data.ml` contains generated data. This file needs
+to be regenerated on new Unicode releases, as well as the `opam` file.
 
-    ocaml ./pkg/build_support.ml
+In order to do so you need to install an updated version of the [uucd]
+OCaml package which is capable of reading the latest XML Unicode
+character database.
 
-The result is in the file `src/uunf_data.ml`. It contains the data
-extracted from the Unicode character database needed to implement the
-normalization forms. This file is ignored by git.
+You can then bump the Unicode release number at the top of the `B0.ml`
+file. Verify that everything is as expected with:
+
+    b0 -- unicode-version
+
+You should then download a copy of the XML Unicode character database
+to the `support/ucd.xml` file which is ignored by git. If you have
+`curl` and `unzip` in your `PATH` you can simply issue:
+
+    b0 -- download-ucdxml
+
+You can now proceed to generate the `src/uunf_data.ml` and update the opam file 
+file by issuing:
+
+    b0 -- generate-data
+    b0 -- .opam.file > opam 
 
 [uucd]: http://erratique.ch/software/uucd
 
-# New unicode release
-
-For now proceed as above to generate the data filees using an
-up-to-date [uucd] package.
-
-Update the opam file with: 
-
-```
-b0 -- .opam.file > opam
-```
-
 # Reference tests 
 
-To download the reference normalization tests for the version
-mentioned in `B0.ml` to the `test` directory issue:
+To test the package on the reference normalization tests of you must
+download a copy of the tests to the `test/NormalizationTest.txt` file
+which is ignored by git.
+
+If you have `curl` in your `PATH` you can simply issue: 
 
     b0 -- download-tests
+
+this downloads the tests for the unicode version mentioned in `B0.ml`. 
 
 You can then check them with: 
 
     b0 -- test
- 
 

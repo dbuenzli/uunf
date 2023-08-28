@@ -19,24 +19,21 @@ let ucd_or_die inf = try
       exit 1
 with Sys_error e -> Printf.eprintf "%s\n%!" e; exit 1
 
-let process inf norm =
-  let inf = match inf with None -> "support/ucd.xml" | Some inf -> inf in
+let process inf outf =
   let ucd = (Gen.log "Loading Unicode character database.\n"; ucd_or_die inf) in
-  let generate pp f ucd = match f with
-  | None -> ()
-  | Some fn ->
+  let generate pp outf ucd =
+    try
+      let oc = if outf = "-" then stdout else open_out outf in
       try
-        let oc = if fn = "-" then stdout else open_out fn in
-        try
-          let ppf = Format.formatter_of_out_channel oc in
-          pp ppf ucd;
-          Format.pp_print_flush ppf ();
-          close_out oc
-        with Sys_error _ as e -> close_out oc; raise e
-      with Sys_error e -> Printf.eprintf "%s\n%!" e; exit 1
+        let ppf = Format.formatter_of_out_channel oc in
+        pp ppf ucd;
+        Format.pp_print_flush ppf ();
+        close_out oc
+      with Sys_error _ as e -> close_out oc; raise e
+    with Sys_error e -> Printf.eprintf "%s\n%!" e; exit 1
   in
   Gen.log "Note: reported sizes do not take sharing into account.\n";
-  generate Gen_norm.pp_mod norm ucd;
+  generate Gen_norm.pp_mod outf ucd;
   ()
 
 let main () =
@@ -51,13 +48,15 @@ let main () =
     if !inf = None then inf := Some f else
     raise (Arg.Bad "only one Unicode character database file can be specified")
   in
-  let norm = ref None in
+  let outf = ref None in
   let set r = Arg.String (fun s -> r := Some s) in
   let options = [
-    "-norm", set norm, "<FILE> Support for the normalization properties";
+    "-o", set outf, "<FILE> output file, defaults to src/uunf_data.ml";
   ]
   in
   Arg.parse (Arg.align options) set_inf usage;
-  process !inf !norm
+  let inf = match !inf with None -> "support/ucd.xml" | Some inf -> inf in
+  let outf = match !outf with None -> "src/uunf_data.ml" | Some outf -> outf in
+  process inf outf
 
 let () = main ()
