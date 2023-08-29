@@ -3,37 +3,23 @@
    SPDX-License-Identifier: ISC
   ---------------------------------------------------------------------------*)
 
+(* Uunf tests, including Unicode's Normalization Conformance tests *)
+
+let ( let* ) = Result.bind
+
 let uchar_dump ppf u = Format.fprintf ppf "U+%04X" (Uchar.to_int u)
-
-(* Checks that Uunf passes Unicode's Normalization Conformance tests and
-   also performs other tests. *)
-
-let split_string s sep =
-  let rec split accum j =
-    let i = try (String.rindex_from s j sep) with Not_found -> -1 in
-    if (i = -1) then
-      let p = String.sub s 0 (j + 1) in
-      if p <> "" then p :: accum else accum
-    else
-    let p = String.sub s (i + 1) (j - i) in
-    let accum' = if p <> "" then p :: accum else accum in
-    split accum' (i - 1)
-  in
-  split [] (String.length s - 1)
-
 let log f = Format.eprintf (f ^^ "@?")
+let ok () = log "[\x1B[32mDONE\x1B[0m]\n"
 let fail fmt =
   let fail _ = failwith (Format.flush_str_formatter ()) in
   Format.kfprintf fail Format.str_formatter fmt
 
-(* Conformance data decoding *)
+(* Conformance data decoding and tests *)
 
-type conformance_test = int list array * string        (* columns + comment. *)
-module Uset = Set.Make(Uchar)          (* not a diet set, but will do here. *)
+type conformance_test = int list array * string (* columns + comment. *)
+module Uset = Set.Make (Uchar) (* not a diet set, but will do here. *)
 
-let err_test_file () = invalid_arg "test data file invariant violated"
-
-let uchar_of_string v =                            (* parses a scalar value. *)
+let uchar_of_string v = (* parses a scalar value. *)
   let is_hex c = (0x30 <= c && c <= 0x39) || (0x41 <= c && c <= 0x46) in
   let cp = ref 0 in
   for k = 0 to (String.length v) - 1 do
@@ -43,42 +29,50 @@ let uchar_of_string v =                            (* parses a scalar value. *)
   done;
   Uchar.of_int !cp
 
-let uchars_of_string v = List.map uchar_of_string (split_string v ' ')
-let decode_conformance_data ic =
-  let rec loop tests collect_decomps decomps =
-    match try Some (input_line ic) with End_of_file -> None with
-    | None -> List.rev tests, decomps
-    | Some l ->
-        try match split_string l '#' with
-        | "@Part1 " :: _ -> loop tests true decomps
-        | "@Part2 " :: _ -> loop tests false decomps
-        | p :: _ :: _ when p.[0] = '@' -> loop tests collect_decomps decomps
-        | [] | _ :: [] -> loop tests collect_decomps decomps
-        | test :: comment :: _ ->
-            begin match split_string test ';' with
-            | c1 :: c2 :: c3 :: c4 :: c5 :: _ ->
-                let test = [| uchars_of_string c1; uchars_of_string c2;
-                              uchars_of_string c3; uchars_of_string c4;
-                              uchars_of_string c5; |], comment
-                in
-                let decomps =
-                  if not collect_decomps then decomps else
-                  match (fst test).(0) with [ uchar ] ->
-                    Uset.add uchar decomps
-                  | _ -> failwith ""
-                in
-                loop (test :: tests) collect_decomps decomps
-            | _ -> failwith ""
-            end
-        with Failure _ ->
-          log "Unable to parse line:\n`%s'\n" l;
-          loop tests collect_decomps decomps
-  in
-  loop [] false Uset.empty
+let uchars_of_string v = List.map uchar_of_string (String.split_on_char ' ' v)
 
-(* Tests *)
+let decode_conformance_data inf =
+  log "Reading test data from %s... " (if inf = "-" then "stdin" else inf);
+  let split_string sep s =
+    List.filter (fun s -> s <> "") (String.split_on_char sep s)
+  in
+  let rec loop tests collect_decomps decomps = function
+  | [] -> List.rev tests, decomps
+  | l :: ls ->
+      try match split_string '#' l with
+      | "@Part1 " :: _ -> loop tests true decomps ls
+      | "@Part2 " :: _ -> loop tests false decomps ls
+      | p :: _ :: _ when p.[0] = '@' -> loop tests collect_decomps decomps ls
+      | [] | _ :: [] -> loop tests collect_decomps decomps ls
+      | test :: comment :: _ ->
+          begin match split_string ';' test with
+          | c1 :: c2 :: c3 :: c4 :: c5 :: _ ->
+              let test = [| uchars_of_string c1; uchars_of_string c2;
+                            uchars_of_string c3; uchars_of_string c4;
+                            uchars_of_string c5; |], comment
+              in
+              let decomps =
+                if not collect_decomps then decomps else
+                match (fst test).(0) with [ uchar ] ->
+                  Uset.add uchar decomps
+                                        | _ -> failwith ""
+              in
+              loop (test :: tests) collect_decomps decomps ls
+          | _ -> failwith ""
+          end
+      with Failure _ ->
+        log "Unable to parse line:\n`%s'\n" l;
+        loop tests collect_decomps decomps ls
+  in
+  try
+    let ic = if inf = "-" then stdin else In_channel.open_bin inf in
+    let finally () = if inf <> "-" then close_in ic in
+    let s = Fun.protect ~finally @@ fun () -> In_channel.input_all ic in
+    Ok (loop [] false Uset.empty (String.split_on_char '\n' s))
+  with Sys_error e -> Error e
 
 let test_conformance_normalizations tests =
+  log "Testing conformance normalization invariants... ";
   let nc, nfc = Array.init 5 (fun _ -> Uunf.create `NFC), Array.make 5 [] in
   let nd, nfd = Array.init 5 (fun _ -> Uunf.create `NFD), Array.make 5 [] in
   let nkc, nfkc = Array.init 5 (fun _ -> Uunf.create `NFKC), Array.make 5 [] in
@@ -130,6 +124,7 @@ let test_conformance_normalizations tests =
   List.iter test tests
 
 let test_conformance_non_decomposables decomps =
+  log "Testing conformance of non-decomposable characters... ";
   let nc = Uunf.create `NFC in
   let nd = Uunf.create `NFD in
   let nkc = Uunf.create `NFKC in
@@ -163,18 +158,15 @@ let test_conformance_non_decomposables decomps =
   in
   loop Uchar.min
 
-let test_others () =
-  let test src nf dst =
-    let n = Uunf.create nf in
-    let rec add acc v = match Uunf.add n v with
-    | `Uchar u -> add (u :: acc) `Await
-    | `Await | `End -> acc
-    in
-    let add_uchar acc u = add acc (`Uchar (Uchar.of_int u)) in
-    let nseq = List.rev (add (List.fold_left add_uchar [] src) `End) in
-    let dst = List.map Uchar.of_int dst in
-    if nseq <> dst then fail ""
-  in
+(* Other tests *)
+
+let test_ccc () =
+  log "Testing Uunf.ccc\n";
+  assert (Uunf.ccc (Uchar.of_int 0x0020) = 0);
+  assert (Uunf.ccc (Uchar.of_int 0x0301) = 230);
+  ()
+
+let various_norm_tests test =
   test [0x1E69] `NFD [0x0073; 0x0323; 0x0307];
   test [0x1E69] `NFC [0x1E69];
   test [0x1E0B; 0x0323] `NFD [0x0064; 0x0323; 0x0307];
@@ -200,7 +192,42 @@ let test_others () =
   test [0xC100; 0x20D2; 0x11C1; 0x11C1] `NFC [0xC100; 0x20D2; 0x11C1; 0x11C1];
   ()
 
+let test_specific () =
+  log "Testing specific normalizations\n";
+  let test src nf dst =
+    let n = Uunf.create nf in
+    let rec add acc v = match Uunf.add n v with
+    | `Uchar u -> add (u :: acc) `Await
+    | `Await | `End -> acc
+    in
+    let add_uchar acc u = add acc (`Uchar (Uchar.of_int u)) in
+    let nseq = List.rev (add (List.fold_left add_uchar [] src) `End) in
+    let dst = List.map Uchar.of_int dst in
+    if nseq <> dst then fail ""
+  in
+  various_norm_tests test
+
+let test_uunf_string () =
+  log "Testing Uunf_string\n";
+  let test enc normalize =
+    let b = Buffer.create 42 in
+    let enc us =
+      let rec loop = function
+      | u :: us -> enc b (Uchar.of_int u); loop us
+      | [] -> Buffer.contents b
+      in
+      Buffer.reset b; loop us
+    in
+    let test src nf dst = assert ((normalize nf (enc src)) = (enc dst)) in
+    various_norm_tests test
+  in
+  test Buffer.add_utf_8_uchar Uunf_string.normalize_utf_8;
+  test Buffer.add_utf_16be_uchar Uunf_string.normalize_utf_16be;
+  test Buffer.add_utf_16le_uchar Uunf_string.normalize_utf_16le;
+  ()
+
 let test_flushing_end_seq () =
+  log "Testing flushing end of stream\n";
   let n = Uunf.create `NFKC in
   let uchar u = `Uchar (Uchar.of_int u) in
   if Uunf.add n (uchar 0x2105) <> `Await then fail "";
@@ -211,49 +238,37 @@ let test_flushing_end_seq () =
   if Uunf.add n `Await <> `End then fail "";
   ()
 
-let test_ccc () =
-  assert (Uunf.ccc (Uchar.of_int 0x0020) = 0);
-  assert (Uunf.ccc (Uchar.of_int 0x0301) = 230);
-  ()
-
 let test inf =
-  try
-    let ok () = log "[DONE]\n" in
-    let ic = if inf = "-" then stdin else open_in inf in
-    log "Reading test data from %s... " (if inf = "-" then "stdin" else inf);
-    let tests, decomps = decode_conformance_data ic in
-    if inf <> "-" then close_in ic;
-    ok (); log "Testing conformance normalization invariants... ";
-    test_conformance_normalizations tests;
-    ok (); log "Testing conformance of non-decomposable characters... ";
-    test_conformance_non_decomposables decomps;
-    ok (); log "Unicode normalization conformance tests passed!\n";
-    log "Testing Uunf.ccc\n";
-    test_ccc ();
-    log "Making other tests...\n";
-    test_others ();
-    log "Testing flushing end of stream\n";
-    test_flushing_end_seq ();
-    ok (); log "Success!\n"
-  with Sys_error e -> log "%s\n" e; exit 1
+  test_ccc ();
+  test_specific ();
+  test_uunf_string ();
+  test_flushing_end_seq ();
+  let skipped = match decode_conformance_data inf with
+  | Error e -> log "\n\x1B[31mError\x1B[0m: %s\n" e; true
+  | Ok (tests, decomps) ->
+      ok (); test_conformance_normalizations tests;
+      ok (); test_conformance_non_decomposables decomps;
+      ok ();
+      false;
+  in
+  if skipped
+  then log "\x1B[33mWarning\x1B[0m: Conformance tests skipped.\n"
+  else log "Unicode normalization conformance tests \x1B[32mpassed\x1B[0m!\n";
+  log "\x1B[32mSuccess\x1B[0m!\n"
 
 let main () =
   let usage = Printf.sprintf
-    "Usage: %s [INFILE]\n\
-    \ Checks the Unicode normalization conformance test by reading the\n\
-    \ test data from INFILE or stdin. The data file is available here: \n\
- \ http://www.unicode.org/Public/%%UNICODEVERSION%%/ucd/NormalizationTest.txt\n\
+    "Usage: %s [FILE]\n\
+    \ Uunf test suite. Checks the Unicode normalization conformance test \n\
+    \ by reading the test data from FILE (defaults to \
+     test/NormalizationTest.txt)\n\
     Options:" (Filename.basename Sys.executable_name)
   in
   let inf = ref None in
   let err_inf () = raise (Arg.Bad "only one file can be specified") in
   let set_inf f = if !inf <> None then err_inf () else inf := Some f in
-  let options = [] in
-  Arg.parse (Arg.align options) set_inf usage;
-  let inf = match !inf with
-  | None -> "test/NormalizationTest.txt"
-  | Some inf -> inf
-  in
+  Arg.parse [] set_inf usage;
+  let inf = Option.value ~default:"test/NormalizationTest.txt" !inf in
   test inf
 
-let () = if (not !Sys.interactive) then main ()
+let () = if !Sys.interactive then () else main ()

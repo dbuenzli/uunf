@@ -67,14 +67,8 @@ let test =
              |> tag test
              |> add B0_unit.Action.exec_cwd scope_dir)
   in
-  let requires = [ uunf ] in
+  let requires = [ uunf; uunf_string ] in
   B0_ocaml.exe "test" ~doc:"Test normalization" ~srcs ~meta ~requires
-
-let test_string =
-  let srcs = Fpath.[`File (v "test/test_string.ml")] in
-  let meta = B0_meta.(empty |> tag test) in
-  let requires = [ uutf; uunf; uunf_string ] in
-  B0_ocaml.exe "test_string" ~doc:"Test uunf.string" ~srcs ~meta ~requires
 
 let examples =
   let srcs = Fpath.[`File (v "test/examples.ml")] in
