@@ -6,31 +6,16 @@ let next_major = let maj, _, _, _ = unicode_version in (maj + 1), 0, 0, None
 
 (* OCaml library names *)
 
-let uutf = B0_ocaml.libname "uutf"
-
-let xmlm = B0_ocaml.libname "xmlm"
 let uucd = B0_ocaml.libname "uucd"
+let uutf = B0_ocaml.libname "uutf"
 let cmdliner = B0_ocaml.libname "cmdliner"
-
 let uunf = B0_ocaml.libname "uunf"
-let uunf_string = B0_ocaml.libname "uunf.string"
 
 (* Libraries *)
 
 let uunf_lib =
-  let srcs = Fpath.[ `Dir (v "src");
-                     `X (v "src/uunf_string.ml");
-                     `X (v "src/uunf_string.mli"); ]
-  in
-  let requires = [] in
-  B0_ocaml.lib uunf ~doc:"The uunf library" ~srcs ~requires
-
-let uunf_string_lib =
-  let srcs = Fpath.[ `File (v "src/uunf_string.ml");
-                     `File (v "src/uunf_string.mli") ]
-  in
-  let requires = [uunf] in
-  B0_ocaml.lib uunf_string ~doc:"The uunf.string library" ~srcs ~requires
+  let srcs = [`Dir (Fpath.v "src")] in
+  B0_ocaml.lib uunf ~doc:"The uunf library" ~srcs
 
 (* Data generation. *)
 
@@ -41,7 +26,7 @@ let generate_data =
                `File (Fpath.v "src/uunf_tmap.ml");
                `File (Fpath.v "src/uunf_fmt.ml")]
   in
-  let requires = [xmlm; uucd] in
+  let requires = [uucd] in
   let meta =
     let scope_dir b u = Fut.return (B0_build.scope_dir b u) in
     B0_meta.(empty |> add B0_unit.Action.exec_cwd scope_dir)
@@ -52,7 +37,7 @@ let generate_data =
 (* Tools *)
 
 let unftrip =
-  let srcs = Fpath.[`File (v "test/unftrip.ml")] in
+  let srcs = [`File (Fpath.v "test/unftrip.ml")] in
   let requires = [cmdliner; uutf; uunf] in
   B0_ocaml.exe "unftrip" ~doc:"The unftrip tool" ~srcs ~requires
 
@@ -67,7 +52,7 @@ let test =
              |> tag test
              |> add B0_unit.Action.exec_cwd scope_dir)
   in
-  let requires = [ uunf; uunf_string ] in
+  let requires = [uunf] in
   B0_ocaml.exe "test" ~doc:"Test normalization" ~srcs ~meta ~requires
 
 let examples =

@@ -13,8 +13,7 @@ let () =
   Pkg.describe "uunf" ~opams @@ fun c ->
   let uutf = Conf.value c uutf in
   let cmdliner = Conf.value c cmdliner in
-  Ok [ Pkg.mllib ~api:["Uunf"] "src/uunf.mllib";
-       Pkg.mllib "src/uunf_string.mllib" ~dst_dir:"string";
+  Ok [ Pkg.mllib ~api:["Uunf"; "Uunf_string"] "src/uunf.mllib";
        Pkg.bin ~cond:(uutf && cmdliner) "test/unftrip";
        Pkg.test "test/test" ~args:(Cmd.v "test/NormalizationTest.txt");
        Pkg.test "test/examples";

@@ -2,7 +2,7 @@
 
 Uunf normalizes Unicode text. See {!Uunf} for more details.
 
-{1:api API}
+{1:uunf Library [uunf]}
 
 {!modules:
 Uunf
