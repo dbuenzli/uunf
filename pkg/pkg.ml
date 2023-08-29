@@ -14,7 +14,7 @@ let () =
   let uutf = Conf.value c uutf in
   let cmdliner = Conf.value c cmdliner in
   Ok [ Pkg.mllib ~api:["Uunf"] "src/uunf.mllib";
-       Pkg.mllib ~cond:uutf "src/uunf_string.mllib" ~dst_dir:"string";
+       Pkg.mllib "src/uunf_string.mllib" ~dst_dir:"string";
        Pkg.bin ~cond:(uutf && cmdliner) "test/unftrip";
        Pkg.test "test/test" ~args:(Cmd.v "test/NormalizationTest.txt");
        Pkg.test ~cond:uutf "test/test_string";

@@ -5,9 +5,7 @@ true : bin_annot, safe_string
 <support/generate_data.{ml,mli,byte,native}> : package(uucd)
 
 <src> : include
-<src/uunf_string*> : package(uutf)
 
 <test> : include
-<test/test_string*> : package(uutf)
 <test/unftrip*> : package(uutf), package(cmdliner)
 <test/examples*> : package(uutf)

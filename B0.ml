@@ -29,7 +29,7 @@ let uunf_string_lib =
   let srcs = Fpath.[ `File (v "src/uunf_string.ml");
                      `File (v "src/uunf_string.mli") ]
   in
-  let requires = [uunf; uutf] in
+  let requires = [uunf] in
   B0_ocaml.lib uunf_string ~doc:"The uunf.string library" ~srcs ~requires
 
 (* Data generation. *)

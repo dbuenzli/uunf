@@ -7,12 +7,9 @@ Unicode [normalization forms][nf]. The library is independent from any
 IO mechanism or Unicode text data structure and it can process text
 without a complete in-memory representation.
 
-Uunf has no dependency. It may optionally depend on [Uutf][uutf] for
-support on OCaml UTF-X encoded strings. It is distributed under the
-ISC license.
+Uunf has no dependency. It is distributed under the ISC license.
 
 [nf]: http://www.unicode.org/reports/tr15/
-[uutf]: http://erratique.ch/software/uutf
 
 Home page: http://erratique.ch/software/uunf  
 
@@ -21,7 +18,7 @@ Home page: http://erratique.ch/software/uunf
 Uunf can be installed with `opam`:
 
     opam install uunf
-    opam install uutf uunf # for support on OCaml UTF-X encoded strings
+    opam install uunf cmdliner uutf # for the unftrip tool.
 
 If you don't use `opam` consult the [`opam`](opam) file for build
 instructions and a complete specification of the dependencies.
@@ -38,7 +35,7 @@ via `odig doc uunf`.
 ## Sample programs
 
 If you installed Uuseg with `opam` sample programs are located in
-the directory `opam config var uuseg:doc`.
+the directory `opam var uunf:doc`.
 
 A few test programs are in the `test` directory of the distribution.
 
