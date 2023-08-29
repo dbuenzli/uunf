@@ -59,7 +59,7 @@ let unftrip =
 (* Tests *)
 
 let test =
-  let srcs = Fpath.[`File (v "test/test.ml")] in
+  let srcs = [`File (Fpath.v "test/test.ml")] in
   (* FIXME b0, this is not so good. *)
   let meta =
     let scope_dir b u = Fut.return (B0_build.scope_dir b u) in
@@ -71,10 +71,10 @@ let test =
   B0_ocaml.exe "test" ~doc:"Test normalization" ~srcs ~meta ~requires
 
 let examples =
-  let srcs = Fpath.[`File (v "test/examples.ml")] in
+  let srcs = [`File (Fpath.v "test/examples.ml")] in
   let meta = B0_meta.(empty |> tag test) in
-  let requires = [uutf; uunf] in
-  B0_ocaml.exe "examples" ~doc:"Examples" ~srcs ~meta ~requires
+  let requires = [uunf] in
+  B0_ocaml.exe "examples" ~doc:"Doc samples" ~srcs ~meta ~requires
 
 (* Cmdlets *)
 
