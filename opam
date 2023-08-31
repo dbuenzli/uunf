@@ -20,7 +20,7 @@ homepage: "https://erratique.ch/software/uunf"
 doc: "https://erratique.ch/software/uunf/doc/Uunf"
 bug-reports: "https://github.com/dbuenzli/uunf/issues"
 depends: [
-  "ocaml" {>= "4.03.0"}
+  "ocaml" {>= "4.14.0"}
   "ocamlfind" {build}
   "ocamlbuild" {build}
   "topkg" {build & >= "1.0.3"}

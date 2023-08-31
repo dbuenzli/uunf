@@ -131,7 +131,7 @@ let default =
       [ "uutf", {|< "1.0.0"|};
         "cmdliner", {|< "1.1.0"|}]
     |> add B0_opam.Meta.depends
-      [ "ocaml", {|>= "4.03.0"|};
+      [ "ocaml", {|>= "4.14.0"|};
         "ocamlfind", {|build|};
         "ocamlbuild", {|build|};
         "topkg", {|build & >= "1.0.3"|};
