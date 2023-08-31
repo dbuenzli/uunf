@@ -2,8 +2,10 @@ true : bin_annot, safe_string
 
 <_b0> : -traverse
 
-<support> : include
-<support/generate_data.{ml,mli,byte,native}> : package(uucd)
 <src> : include
+
+<support> : include
+<support/**> : package(uucd)
+
 <test> : include
 <test/unftrip*> : package(uutf), package(cmdliner)
