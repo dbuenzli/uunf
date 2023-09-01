@@ -11,8 +11,7 @@ let utf_8_normalize nf s =
   let rec loop buf s i max normalizer =
     if i > max then (add buf normalizer `End; Buffer.contents buf) else
     let dec = String.get_utf_8_uchar s i in
-    let u = Uchar.utf_decode_uchar dec in
-    add buf normalizer (`Uchar u);
+    add buf normalizer (`Uchar (Uchar.utf_decode_uchar dec));
     loop buf s (i + Uchar.utf_decode_length dec) max normalizer
   in
   let buf = Buffer.create (String.length s * 3) in
