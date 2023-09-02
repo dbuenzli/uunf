@@ -5,7 +5,7 @@ true : bin_annot, safe_string
 <src> : include
 
 <support> : include
-<support/**> : package(uucd)
+<support/**> : package(uucd unix)
 
 <test> : include
 <test/unftrip*> : package(uutf), package(cmdliner)

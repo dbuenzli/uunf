@@ -6,6 +6,7 @@ let next_major = let maj, _, _, _ = unicode_version in (maj + 1), 0, 0, None
 
 (* OCaml library names *)
 
+let unix = B0_ocaml.libname "unix"
 let uucd = B0_ocaml.libname "uucd"
 let uutf = B0_ocaml.libname "uutf"
 let cmdliner = B0_ocaml.libname "cmdliner"
@@ -26,7 +27,7 @@ let generate_data =
                `File (Fpath.v "src/uunf_tmap.ml");
                `File (Fpath.v "src/uunf_fmt.ml")]
   in
-  let requires = [uucd] in
+  let requires = [uucd; unix] in
   let meta =
     let scope_dir b u = Fut.return (B0_build.scope_dir b u) in
     B0_meta.(empty |> add B0_unit.Action.exec_cwd scope_dir)

@@ -81,13 +81,15 @@ let ucd_get ucd u p pstr = match Uucd.cp_prop ucd u p with
 
 (* Generate a module *)
 
+let year = (Unix.gmtime (Unix.gettimeofday ())).Unix.tm_year + 1900
+
 let pp_mod pp_mod ppf m =
   pp ppf
 "\
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 The uunf programmers. All rights reserved.
+   Copyright (c) %d The uunf programmers. All rights reserved.
    SPDX-License-Identifier: ISC
   ---------------------------------------------------------------------------*)
 
 (* WARNING do not edit. This file was automatically generated. *)
-@\n@[%a@]@\n" pp_mod m
+@\n@[%a@]@\n" year pp_mod m
