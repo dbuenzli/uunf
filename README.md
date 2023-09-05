@@ -32,7 +32,7 @@ The documentation can be consulted [online] or via `odig doc uunf`.
 Questions are welcome but better asked on the [OCaml forum] than on 
 the issue tracker.
 
-[doc]: http://erratique.ch/software/uunf/doc/
+[online]: http://erratique.ch/software/uunf/doc/
 [OCaml forum]: https://discuss.ocaml.org/
 
 

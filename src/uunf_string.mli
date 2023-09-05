@@ -3,9 +3,9 @@
    SPDX-License-Identifier: ISC
   ---------------------------------------------------------------------------*)
 
-(** Unicode text normalization on UTF-X OCaml strings.
+(** Unicode text normalization on UTF OCaml strings.
 
-    {!Uunf} functions acting directly on UTF-X encoded OCaml strings.
+    {!Uunf} functions acting directly on UTF encoded OCaml strings.
 
     {b Warning.} All these function silently replace malformed encoded Unicode
     data by a {!Stdlib.Uchar.rep} character. *)

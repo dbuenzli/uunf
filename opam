@@ -3,15 +3,15 @@ name: "uunf"
 synopsis: "Unicode text normalization for OCaml"
 description: """\
 Uunf is an OCaml library for normalizing Unicode text. It supports all
-Unicode [normalization forms][nf]. The library is independent from any
-IO mechanism or Unicode text data structure and it can process text
+Unicode [normalization forms]. The library is independent from any IO
+mechanism or Unicode text data structure and it can process text
 without a complete in-memory representation.
 
-Uunf has no dependency. It is distributed under the ISC license.
+Uunf is distributed under the ISC license. It has no dependency.
 
-[nf]: http://www.unicode.org/reports/tr15/
+[normalization forms]: http://www.unicode.org/reports/tr15/
 
-Home page: http://erratique.ch/software/uunf"""
+Homepage: <http://erratique.ch/software/uunf>"""
 maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
 authors: "The uunf programmers"
 license: "ISC"

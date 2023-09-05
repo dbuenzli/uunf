@@ -106,7 +106,7 @@ val decomp : Uchar.t -> int array
     mapping}. If the empty array is returned, [u] decomposes to itself.
 
     The first number in the array contains additional information, it
-    cannot be used as an {!uchar}. Use {!d_uchar} on the number to get the
+    cannot be used as an {!Uchar.t}. Use {!d_uchar} on the number to get the
     actual character and {!d_compatibility} to find out if this is
     a compatibility decomposition. All other characters of the array
     are guaranteed to be convertible using {!Uchar.of_int}.
