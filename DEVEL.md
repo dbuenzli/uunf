@@ -22,7 +22,7 @@ You can now proceed to generate the `src/uunf_data.ml` and update the opam file
 file by issuing:
 
     b0 -- generate-data
-    b0 -- .opam.file > opam 
+    b0 -- .opam file > opam 
 
 [uucd]: http://erratique.ch/software/uucd
 
