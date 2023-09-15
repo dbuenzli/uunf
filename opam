@@ -24,7 +24,6 @@ depends: [
   "ocamlfind" {build}
   "ocamlbuild" {build}
   "topkg" {build & >= "1.0.3"}
-  "b0" {dev & >= "0.0.5"}
   "uucd" {dev & >= "15.1.0" & < "16.0.0"}
 ]
 depopts: ["uutf" "cmdliner"]

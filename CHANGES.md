@@ -1,7 +1,8 @@
-
+v15.1.0 2022-09-15 Zagreb
+-------------------------
 
 - Unicode 15.1.0 support. 
-- Requires OCaml 4.14.0 for the UTF decoders.
+- Requires OCaml 4.14.0.
 - The `Uunf_string` module was rewritten to use the standard library
   UTF decoders and was moved to the `uunf` library. The `uunf.string`
   library is deprecated, it warns on usage and simply requires `uunf`.
