@@ -5,8 +5,12 @@ archive(byte) = "uunf.cma"
 archive(native) = "uunf.cmxa"
 plugin(byte) = "uunf.cma"
 plugin(native) = "uunf.cmxs"
+exists_if = "uunf.cma uunf.cmxa"
 
 package "string" (
-  warning = "Deprecated. Use the uunf library, the Uunf_string module has moved there."
+  description = "The uunf.string library (deprecated)"
+  version = "%%VERSION_NUM%%"
   requires = "uunf"
+  represents = "uunf"
+  warning = "Deprecated. Use the uunf library."
 )
