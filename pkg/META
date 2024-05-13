@@ -11,6 +11,6 @@ package "string" (
   description = "The uunf.string library (deprecated)"
   version = "%%VERSION_NUM%%"
   requires = "uunf"
-  represents = "uunf"
-  warning = "Deprecated. Use the uunf library."
+  exports = "uunf"
+  warning = "Deprecated, use the uunf library."
 )

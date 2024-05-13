@@ -18,8 +18,8 @@ let uunf = B0_ocaml.libname "uunf"
 let uunf_lib = B0_ocaml.lib uunf ~doc:"The uunf library" ~srcs:[ `Dir ~/"src" ]
 
 let uunf_string_lib =
-  let represents = [uunf] in
-  B0_ocaml.deprecated_lib ~represents (B0_ocaml.libname "uunf.string")
+  let exports = [uunf] in
+  B0_ocaml.deprecated_lib ~exports (B0_ocaml.libname "uunf.string")
 
 (* Data generation. *)
 
@@ -33,11 +33,7 @@ let generate_data =
       `File ~/"src/uunf_fmt.ml" ]
   in
   let requires = [ uucd; unix ] in
-  let meta =
-    B0_meta.empty
-    |> B0_meta.tag B0_meta.build
-    |> ~~ B0_unit.Exec.cwd `Scope_dir
-  in
+  let meta = B0_meta.(empty |> tag build |> ~~ B0_unit.Action.cwd `Scope_dir) in
   B0_ocaml.exe "generate-data" ~doc ~srcs ~requires ~meta
 
 (* Tools *)
@@ -51,11 +47,7 @@ let unftrip =
 
 let test =
   let srcs = [ `File ~/"test/test.ml" ] in
-  let meta =
-    B0_meta.empty
-    |> B0_meta.tag B0_meta.test
-    |> ~~ B0_unit.Exec.cwd `Scope_dir
-  in
+  let meta = B0_meta.(empty |> tag test |> ~~ B0_unit.Action.cwd `Scope_dir) in
   let requires = [ uunf ] in
   B0_ocaml.exe "test" ~doc:"Test normalization" ~srcs ~meta ~requires
 
@@ -75,13 +67,14 @@ let curl env =
   Cmd.(arg "curl" % "--fail" % "--show-error" % "--progress-bar" % "--location")
 
 let show_version =
-  B0_action.make' "unicode-version" ~doc:"Show supported unicode version" @@
+  B0_unit.of_action "unicode-version" ~doc:"Show supported unicode version" @@
   fun _ _ ~args:_ ->
   Ok (Log.app (fun m -> m "%s" (String.of_version unicode_version)))
 
 let download_tests =
-  B0_action.make' "download-tests" ~doc:"Download the UCD normalization tests"@@
-  fun _ env ~args:_ ->
+  let doc = "Download the UCD normalization tests" in
+  B0_unit.of_action "download-tests" ~doc @@
+  fun env _ ~args:_ ->
   let* curl = curl env in
   let version = String.of_version unicode_version in
   let test_uri = Fmt.str "%s/%s/ucd/NormalizationTest.txt" uc_base version in
@@ -92,8 +85,8 @@ let download_tests =
   Os.Cmd.run Cmd.(curl % test_uri) ~stdout
 
 let download_ucdxml =
-  B0_action.make' "download-ucdxml" ~doc:"Download the ucdxml" @@
-  fun _ env ~args:_ ->
+  B0_unit.of_action "download-ucdxml" ~doc:"Download the ucdxml" @@
+  fun env _ ~args:_ ->
   let* curl = curl env and* unzip = unzip env in
   let version = String.of_version unicode_version in
   let ucd_uri = Fmt.str "%s/%s/ucdxml/ucd.all.grouped.zip" uc_base version in
