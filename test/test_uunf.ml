@@ -10,7 +10,6 @@ open B0_testing
 let ( let* ) = Result.bind
 
 let uchar_dump ppf u = Format.fprintf ppf "U+%04X" (Uchar.to_int u)
-let log f = Format.eprintf (f ^^ "@?")
 
 (* Conformance data decoding and tests *)
 
@@ -59,7 +58,7 @@ let decode_conformance_data inf =
           | _ -> failwith ""
           end
       with Failure _ ->
-        log "Unable to parse line:\n`%s'\n" l;
+        Test.log "Unable to parse line:\n`%s'\n" l;
         loop tests collect_decomps decomps ls
   in
   try
