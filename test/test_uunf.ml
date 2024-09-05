@@ -3,16 +3,14 @@
    SPDX-License-Identifier: ISC
   ---------------------------------------------------------------------------*)
 
+open B0_testing
+
 (* Uunf tests, including Unicode's Normalization Conformance tests *)
 
 let ( let* ) = Result.bind
 
 let uchar_dump ppf u = Format.fprintf ppf "U+%04X" (Uchar.to_int u)
 let log f = Format.eprintf (f ^^ "@?")
-let ok () = log "[\x1B[32mDONE\x1B[0m]\n"
-let fail fmt =
-  let fail _ = failwith (Format.flush_str_formatter ()) in
-  Format.kfprintf fail Format.str_formatter fmt
 
 (* Conformance data decoding and tests *)
 
@@ -32,7 +30,7 @@ let uchar_of_string v = (* parses a scalar value. *)
 let uchars_of_string v = List.map uchar_of_string (String.split_on_char ' ' v)
 
 let decode_conformance_data inf =
-  log "Reading test data from %s... " (if inf = "-" then "stdin" else inf);
+  Test.log "Reading test data from %s" (if inf = "-" then "stdin" else inf);
   let split_string sep s =
     List.filter (fun s -> s <> "") (String.split_on_char sep s)
   in
@@ -72,7 +70,7 @@ let decode_conformance_data inf =
   with Sys_error e -> Error e
 
 let test_conformance_normalizations tests =
-  log "Testing conformance normalization invariants... ";
+  Test.test "conformance normalization invariants" @@ fun () ->
   let nc, nfc = Array.init 5 (fun _ -> Uunf.create `NFC), Array.make 5 [] in
   let nd, nfd = Array.init 5 (fun _ -> Uunf.create `NFD), Array.make 5 [] in
   let nkc, nfkc = Array.init 5 (fun _ -> Uunf.create `NFKC), Array.make 5 [] in
@@ -100,31 +98,31 @@ let test_conformance_normalizations tests =
       nfkc.(i) <- List.rev nfkc.(i);
       nfkd.(i) <- List.rev nfkd.(i);
     done;
-    if cs.(1) <> nfc.(0) then fail "NFC: c2 <> toNFC(c1) for%s" comment;
-    if cs.(1) <> nfc.(1) then fail "NFC: c2 <> toNFC(c2) for%s" comment;
-    if cs.(1) <> nfc.(2) then fail "NFC: c2 <> toNFC(c3) for%s" comment;
-    if cs.(3) <> nfc.(3) then fail "NFC: c4 <> toNFC(c4) for%s" comment;
-    if cs.(3) <> nfc.(4) then fail "NFC: c4 <> toNFC(c5) for%s" comment;
-    if cs.(2) <> nfd.(0) then fail "NFD: c3 <> toNFD(c1) for%s" comment;
-    if cs.(2) <> nfd.(1) then fail "NFD: c3 <> toNFD(c2) for%s" comment;
-    if cs.(2) <> nfd.(2) then fail "NFD: c3 <> toNFD(c3) for%s" comment;
-    if cs.(4) <> nfd.(3) then fail "NFD: c5 <> toNFD(c4) for%s" comment;
-    if cs.(4) <> nfd.(4) then fail "NFD: c5 <> toNFD(c5) for%s" comment;
-    if cs.(3) <> nfkc.(0) then fail "NFKC: c4 <> toNFKC(c1) for%s" comment;
-    if cs.(3) <> nfkc.(1) then fail "NFKC: c4 <> toNFKC(c2) for%s" comment;
-    if cs.(3) <> nfkc.(2) then fail "NFKC: c4 <> toNFKC(c3) for%s" comment;
-    if cs.(3) <> nfkc.(3) then fail "NFKC: c4 <> toNFKC(c4) for%s" comment;
-    if cs.(3) <> nfkc.(4) then fail "NFKC: c4 <> toNFKC(c5) for%s" comment;
-    if cs.(4) <> nfkd.(0) then fail "NFKD: c5 <> toNFKD(c1) for%s" comment;
-    if cs.(4) <> nfkd.(1) then fail "NFKD: c5 <> toNFKD(c2) for%s" comment;
-    if cs.(4) <> nfkd.(2) then fail "NFKD: c5 <> toNFKD(c3) for%s" comment;
-    if cs.(4) <> nfkd.(3) then fail "NFKD: c5 <> toNFKD(c4) for%s" comment;
-    if cs.(4) <> nfkd.(4) then fail "NFKD: c5 <> toNFKD(c5) for%s" comment;
+    if cs.(1) <> nfc.(0) then Test.fail "NFC: c2 <> toNFC(c1) for%s" comment;
+    if cs.(1) <> nfc.(1) then Test.fail "NFC: c2 <> toNFC(c2) for%s" comment;
+    if cs.(1) <> nfc.(2) then Test.fail "NFC: c2 <> toNFC(c3) for%s" comment;
+    if cs.(3) <> nfc.(3) then Test.fail "NFC: c4 <> toNFC(c4) for%s" comment;
+    if cs.(3) <> nfc.(4) then Test.fail "NFC: c4 <> toNFC(c5) for%s" comment;
+    if cs.(2) <> nfd.(0) then Test.fail "NFD: c3 <> toNFD(c1) for%s" comment;
+    if cs.(2) <> nfd.(1) then Test.fail "NFD: c3 <> toNFD(c2) for%s" comment;
+    if cs.(2) <> nfd.(2) then Test.fail "NFD: c3 <> toNFD(c3) for%s" comment;
+    if cs.(4) <> nfd.(3) then Test.fail "NFD: c5 <> toNFD(c4) for%s" comment;
+    if cs.(4) <> nfd.(4) then Test.fail "NFD: c5 <> toNFD(c5) for%s" comment;
+    if cs.(3) <> nfkc.(0) then Test.fail "NFKC: c4 <> toNFKC(c1) for%s" comment;
+    if cs.(3) <> nfkc.(1) then Test.fail "NFKC: c4 <> toNFKC(c2) for%s" comment;
+    if cs.(3) <> nfkc.(2) then Test.fail "NFKC: c4 <> toNFKC(c3) for%s" comment;
+    if cs.(3) <> nfkc.(3) then Test.fail "NFKC: c4 <> toNFKC(c4) for%s" comment;
+    if cs.(3) <> nfkc.(4) then Test.fail "NFKC: c4 <> toNFKC(c5) for%s" comment;
+    if cs.(4) <> nfkd.(0) then Test.fail "NFKD: c5 <> toNFKD(c1) for%s" comment;
+    if cs.(4) <> nfkd.(1) then Test.fail "NFKD: c5 <> toNFKD(c2) for%s" comment;
+    if cs.(4) <> nfkd.(2) then Test.fail "NFKD: c5 <> toNFKD(c3) for%s" comment;
+    if cs.(4) <> nfkd.(3) then Test.fail "NFKD: c5 <> toNFKD(c4) for%s" comment;
+    if cs.(4) <> nfkd.(4) then Test.fail "NFKD: c5 <> toNFKD(c5) for%s" comment;
   in
   List.iter test tests
 
 let test_conformance_non_decomposables decomps =
-  log "Testing conformance of non-decomposable characters... ";
+  Test.test "conformance of non-decomposable characters" @@ fun () ->
   let nc = Uunf.create `NFC in
   let nd = Uunf.create `NFD in
   let nkc = Uunf.create `NFKC in
@@ -142,13 +140,13 @@ let test_conformance_non_decomposables decomps =
       let ul = [u] in
       Uunf.reset nc; Uunf.reset nd; Uunf.reset nkc; Uunf.reset nkd;
       if norm nc u <> ul then
-        fail "NFC: %a <> toNFC(%a)" uchar_dump u uchar_dump u;
+        Test.fail "NFC: %a <> toNFC(%a)" uchar_dump u uchar_dump u;
       if norm nd u <> ul then
-        fail "NFD: %a <> toNFD(%a)" uchar_dump u uchar_dump u;
+        Test.fail "NFD: %a <> toNFD(%a)" uchar_dump u uchar_dump u;
       if norm nkc u <> ul then
-        fail "NFKC: %a <> toNFKC(%a)" uchar_dump u uchar_dump u;
+        Test.fail "NFKC: %a <> toNFKC(%a)" uchar_dump u uchar_dump u;
       if norm nkd u <> ul then
-        fail "NFKD: %a <> toNFKD(%a)" uchar_dump u uchar_dump u;
+        Test.fail "NFKD: %a <> toNFKD(%a)" uchar_dump u uchar_dump u;
     end
   in
   (* For each unicode scalar value *)
@@ -161,7 +159,7 @@ let test_conformance_non_decomposables decomps =
 (* Other tests *)
 
 let test_ccc () =
-  log "Testing Uunf.ccc\n";
+  Test.test "Uunf.ccc" @@ fun () ->
   assert (Uunf.ccc (Uchar.of_int 0x0020) = 0);
   assert (Uunf.ccc (Uchar.of_int 0x0301) = 230);
   ()
@@ -193,7 +191,7 @@ let various_norm_tests test =
   ()
 
 let test_specific () =
-  log "Testing specific normalizations\n";
+  Test.test "specific normalizations" @@ fun () ->
   let test src nf dst =
     let n = Uunf.create nf in
     let rec add acc v = match Uunf.add n v with
@@ -203,12 +201,12 @@ let test_specific () =
     let add_uchar acc u = add acc (`Uchar (Uchar.of_int u)) in
     let nseq = List.rev (add (List.fold_left add_uchar [] src) `End) in
     let dst = List.map Uchar.of_int dst in
-    if nseq <> dst then fail ""
+    if nseq <> dst then Test.fail ""
   in
   various_norm_tests test
 
 let test_uunf_string () =
-  log "Testing Uunf_string\n";
+  Test.test "Uunf_string" @@ fun () ->
   let test enc normalize =
     let b = Buffer.create 42 in
     let enc us =
@@ -227,34 +225,32 @@ let test_uunf_string () =
   ()
 
 let test_flushing_end_seq () =
-  log "Testing flushing end of stream\n";
+  Test.test "flushing end of stream" @@ fun () ->
   let n = Uunf.create `NFKC in
   let uchar u = `Uchar (Uchar.of_int u) in
-  if Uunf.add n (uchar 0x2105) <> `Await then fail "";
-  if Uunf.add n `Await <> `Await then fail "";
-  if Uunf.add n `End <> (uchar 0x0063) then fail "";
-  if Uunf.add n `Await <> (uchar 0x002F) then fail "";
-  if Uunf.add n `Await <> (uchar 0x006F) then fail "";
-  if Uunf.add n `Await <> `End then fail "";
+  if Uunf.add n (uchar 0x2105) <> `Await then Test.fail "";
+  if Uunf.add n `Await <> `Await then Test.fail "";
+  if Uunf.add n `End <> (uchar 0x0063) then Test.fail "";
+  if Uunf.add n `Await <> (uchar 0x002F) then Test.fail "";
+  if Uunf.add n `Await <> (uchar 0x006F) then Test.fail "";
+  if Uunf.add n `Await <> `End then Test.fail "";
   ()
 
 let test inf =
+  Test.main @@ fun () ->
   test_ccc ();
   test_specific ();
   test_uunf_string ();
   test_flushing_end_seq ();
   let skipped = match decode_conformance_data inf with
-  | Error e -> log "\n\x1B[31mError\x1B[0m: %s\n" e; true
+  | Error e -> Test.fail "%s" e; true
   | Ok (tests, decomps) ->
-      ok (); test_conformance_normalizations tests;
-      ok (); test_conformance_non_decomposables decomps;
-      ok ();
+      test_conformance_normalizations tests;
+      test_conformance_non_decomposables decomps;
       false;
   in
   if skipped
-  then log "\x1B[33mWarning\x1B[0m: Conformance tests skipped.\n"
-  else log "Unicode normalization conformance tests \x1B[32mpassed\x1B[0m!\n";
-  log "\x1B[32mSuccess\x1B[0m!\n"
+  then Test.log "\x1B[33mWarning\x1B[0m: Conformance tests skipped.\n"
 
 let main () =
   let usage = Printf.sprintf
@@ -271,4 +267,4 @@ let main () =
   let inf = Option.value ~default:"test/NormalizationTest.txt" !inf in
   test inf
 
-let () = if !Sys.interactive then () else main ()
+let () = if !Sys.interactive then () else exit (main ())

@@ -40,5 +40,5 @@ this downloads the tests for the unicode version mentioned in `B0.ml`.
 
 You can then check them with: 
 
-    b0 -- test
+    b0 test
 

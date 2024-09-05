@@ -6,6 +6,7 @@ let next_major = let maj, _, _, _ = unicode_version in (maj + 1), 0, 0, None
 
 (* OCaml library names *)
 
+let b0_std = B0_ocaml.libname "b0.std"
 let unix = B0_ocaml.libname "unix"
 let uucd = B0_ocaml.libname "uucd"
 let uutf = B0_ocaml.libname "uutf"
@@ -16,10 +17,8 @@ let uunf = B0_ocaml.libname "uunf"
 (* Libraries *)
 
 let uunf_lib = B0_ocaml.lib uunf ~doc:"The uunf library" ~srcs:[ `Dir ~/"src" ]
-
 let uunf_string_lib =
-  let exports = [uunf] in
-  B0_ocaml.deprecated_lib ~exports (B0_ocaml.libname "uunf.string")
+  B0_ocaml.deprecated_lib ~exports:[uunf] (B0_ocaml.libname "uunf.string")
 
 (* Data generation. *)
 
@@ -46,25 +45,21 @@ let unftrip =
 (* Tests *)
 
 let test =
-  let srcs = [ `File ~/"test/test.ml" ] in
-  let meta = B0_meta.(empty |> tag test |> ~~ B0_unit.Action.cwd `Scope_dir) in
-  let requires = [ uunf ] in
-  B0_ocaml.exe "test" ~doc:"Test normalization" ~srcs ~meta ~requires
+  let srcs = [ `File ~/"test/test_uunf.ml" ] in
+  let meta =
+    B0_meta.(empty |> tag test |> tag run |> ~~ B0_unit.Action.cwd `Scope_dir)
+  in
+  let requires = [ b0_std; uunf ] in
+  B0_ocaml.exe "test_uunf" ~srcs ~meta ~requires ~doc:"Test normalization"
 
 let examples =
   let srcs = [ `File ~/"test/examples.ml" ] in
   let meta = B0_meta.empty |> B0_meta.(tag test) in
-  let requires = [ uunf ] in
-  B0_ocaml.exe "examples" ~doc:"Doc samples" ~srcs ~meta ~requires
+  B0_ocaml.exe "examples" ~srcs ~meta ~requires:[uunf] ~doc:"Doc samples"
 
 (* Actions *)
 
 let uc_base = "http://www.unicode.org/Public"
-
-let unzip env = B0_env.get_cmd env (Cmd.arg "unzip")
-let curl env =
-  B0_env.get_cmd env @@
-  Cmd.(arg "curl" % "--fail" % "--show-error" % "--progress-bar" % "--location")
 
 let show_version =
   B0_unit.of_action "unicode-version" ~doc:"Show supported unicode version" @@
@@ -73,32 +68,25 @@ let show_version =
 
 let download_tests =
   let doc = "Download the UCD normalization tests" in
-  B0_unit.of_action "download-tests" ~doc @@
-  fun env _ ~args:_ ->
-  let* curl = curl env in
+  B0_unit.of_action "download-tests" ~doc @@ fun env _ ~args:_ ->
   let version = String.of_version unicode_version in
-  let test_uri = Fmt.str "%s/%s/ucd/NormalizationTest.txt" uc_base version in
+  let test_url = Fmt.str "%s/%s/ucd/NormalizationTest.txt" uc_base version in
   let test_file = B0_env.in_scope_dir env ~/"test/NormalizationTest.txt" in
   (Log.app @@ fun m ->
-   m "@[<v>Downloading %s@,to %a@]" test_uri Fpath.pp test_file);
-  let stdout = Os.Cmd.out_file ~force:true ~make_path:true test_file in
-  Os.Cmd.run Cmd.(curl % test_uri) ~stdout
+   m "@[<v>Downloading %s@,to %a@]" test_url Fpath.pp test_file);
+  B0_action_kit.fetch_url env test_url test_file
 
 let download_ucdxml =
-  B0_unit.of_action "download-ucdxml" ~doc:"Download the ucdxml" @@
-  fun env _ ~args:_ ->
-  let* curl = curl env and* unzip = unzip env in
+  let doc = "Download the ucdxml to support/ucd.xml" in
+  B0_unit.of_action "download-ucdxml" ~doc @@ fun env _ ~args:_ ->
+  let* unzip = B0_env.get_cmd env (Cmd.tool "unzip") in
   let version = String.of_version unicode_version in
-  let ucd_uri = Fmt.str "%s/%s/ucdxml/ucd.all.grouped.zip" uc_base version in
-  let ucd_file = Fpath.v "support/ucd.xml" in
-  let ucd_file = B0_env.in_scope_dir env ucd_file in
+  let ucd_url = Fmt.str "%s/%s/ucdxml/ucd.all.grouped.zip" uc_base version in
+  let ucd_file = B0_env.in_scope_dir env ~/"support/ucd.xml" in
   Result.join @@ Os.File.with_tmp_fd @@ fun tmpfile tmpfd ->
   (Log.app @@ fun m ->
-   m "@[<v>Downloading %s@,to %a@]" ucd_uri Fpath.pp ucd_file);
-  let* () =
-    let stdout = Os.Cmd.out_fd ~close:true tmpfd in
-    Os.Cmd.run Cmd.(curl % ucd_uri) ~stdout
-  in
+   m "@[<v>Downloading %s@,to %a@]" ucd_url Fpath.pp ucd_file);
+  let* () = B0_action_kit.fetch_url env ucd_url tmpfile in
   let stdout = Os.Cmd.out_file ~force:true ~make_path:true ucd_file in
   Os.Cmd.run Cmd.(unzip % "-p" %% path tmpfile) ~stdout
 
