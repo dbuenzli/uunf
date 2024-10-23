@@ -2,7 +2,7 @@ open B0_kit.V000
 open Result.Syntax
 
 let unicode_version = 16, 0, 0, None (* Adjust on new releases *)
-let next_major = let maj, _, _, _ = unicode_version in (maj + 1), 0, 0, None
+let next_major = B0_version.next_major unicode_version
 
 (* OCaml library names *)
 
@@ -49,7 +49,7 @@ let test =
   let meta =
     B0_meta.(empty |> tag test |> tag run |> ~~ B0_unit.Action.cwd `Scope_dir)
   in
-  let requires = [ b0_std; uunf ] in
+  let requires = [b0_std; uunf; cmdliner] in
   B0_ocaml.exe "test_uunf" ~srcs ~meta ~requires ~doc:"Test normalization"
 
 let examples =
@@ -64,15 +64,15 @@ let uc_base = "http://www.unicode.org/Public"
 let show_version =
   B0_unit.of_action "unicode-version" ~doc:"Show supported unicode version" @@
   fun _ _ ~args:_ ->
-  Ok (Log.app (fun m -> m "%s" (String.of_version unicode_version)))
+  Ok (Log.stdout (fun m -> m "%s" (B0_version.to_string unicode_version)))
 
 let download_tests =
   let doc = "Download the UCD normalization tests" in
   B0_unit.of_action "download-tests" ~doc @@ fun env _ ~args:_ ->
-  let version = String.of_version unicode_version in
+  let version = B0_version.to_string unicode_version in
   let test_url = Fmt.str "%s/%s/ucd/NormalizationTest.txt" uc_base version in
   let test_file = B0_env.in_scope_dir env ~/"test/NormalizationTest.txt" in
-  (Log.app @@ fun m ->
+  (Log.stdout @@ fun m ->
    m "@[<v>Downloading %s@,to %a@]" test_url Fpath.pp test_file);
   B0_action_kit.fetch_url env test_url test_file
 
@@ -80,11 +80,11 @@ let download_ucdxml =
   let doc = "Download the ucdxml to support/ucd.xml" in
   B0_unit.of_action "download-ucdxml" ~doc @@ fun env _ ~args:_ ->
   let* unzip = B0_env.get_cmd env (Cmd.tool "unzip") in
-  let version = String.of_version unicode_version in
+  let version = B0_version.to_string unicode_version in
   let ucd_url = Fmt.str "%s/%s/ucdxml/ucd.all.grouped.zip" uc_base version in
   let ucd_file = B0_env.in_scope_dir env ~/"support/ucd.xml" in
   Result.join @@ Os.File.with_tmp_fd @@ fun tmpfile tmpfd ->
-  (Log.app @@ fun m ->
+  (Log.stdout @@ fun m ->
    m "@[<v>Downloading %s@,to %a@]" ucd_url Fpath.pp ucd_file);
   let* () = B0_action_kit.fetch_url env ucd_url tmpfile in
   let stdout = Os.Cmd.out_file ~force:true ~make_path:true ucd_file in
@@ -119,8 +119,8 @@ let default =
         "topkg", {|build & >= "1.0.3"|};
         "uucd",
         Fmt.str {|dev & >= "%s" & < "%s"|}
-          (String.of_version unicode_version)
-          (String.of_version next_major)
+          (B0_version.to_string unicode_version)
+          (B0_version.to_string next_major)
       ]
     |> ~~ B0_opam.file_addendum
       [ `Field ("post-messages", `L (true, [

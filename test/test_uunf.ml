@@ -4,10 +4,10 @@
   ---------------------------------------------------------------------------*)
 
 open B0_testing
+open B0_std
+open Result.Syntax
 
 (* Uunf tests, including Unicode's Normalization Conformance tests *)
-
-let ( let* ) = Result.bind
 
 let uchar_dump ppf u = Format.fprintf ppf "U+%04X" (Uchar.to_int u)
 
@@ -28,8 +28,8 @@ let uchar_of_string v = (* parses a scalar value. *)
 
 let uchars_of_string v = List.map uchar_of_string (String.split_on_char ' ' v)
 
-let decode_conformance_data inf =
-  Test.log "Reading test data from %s" (if inf = "-" then "stdin" else inf);
+let decode_conformance_data test_data_file =
+  Test.log "Reading test data from %a" (Fmt.code' Fpath.pp) test_data_file;
   let split_string sep s =
     List.filter (fun s -> s <> "") (String.split_on_char sep s)
   in
@@ -61,15 +61,15 @@ let decode_conformance_data inf =
         Test.log "Unable to parse line:\n`%s'\n" l;
         loop tests collect_decomps decomps ls
   in
-  try
-    let ic = if inf = "-" then stdin else In_channel.open_bin inf in
-    let finally () = if inf <> "-" then close_in ic in
-    let s = Fun.protect ~finally @@ fun () -> In_channel.input_all ic in
-    Ok (loop [] false Uset.empty (String.split_on_char '\n' s))
-  with Sys_error e -> Error e
+  let* s = Os.File.read test_data_file in
+  Ok (loop [] false Uset.empty (String.split_on_char '\n' s))
 
-let test_conformance_normalizations tests =
-  Test.test "conformance normalization invariants" @@ fun () ->
+
+let conformance = Test.Arg.make ()
+
+let test_conformance_normalizations =
+  Test.test' conformance "conformance normalization invariants" @@
+  fun (tests, _) ->
   let nc, nfc = Array.init 5 (fun _ -> Uunf.create `NFC), Array.make 5 [] in
   let nd, nfd = Array.init 5 (fun _ -> Uunf.create `NFD), Array.make 5 [] in
   let nkc, nfkc = Array.init 5 (fun _ -> Uunf.create `NFKC), Array.make 5 [] in
@@ -120,8 +120,9 @@ let test_conformance_normalizations tests =
   in
   List.iter test tests
 
-let test_conformance_non_decomposables decomps =
-  Test.test "conformance of non-decomposable characters" @@ fun () ->
+let test_conformance_non_decomposables =
+  Test.test' conformance "conformance of non-decomposable characters" @@
+  fun (_, decomps) ->
   let nc = Uunf.create `NFC in
   let nd = Uunf.create `NFD in
   let nkc = Uunf.create `NFKC in
@@ -155,16 +156,15 @@ let test_conformance_non_decomposables decomps =
   in
   loop Uchar.min
 
-(* Other tests *)
-
-let test_ccc () =
+let test_ccc =
   Test.test "Uunf.ccc" @@ fun () ->
-  assert (Uunf.ccc (Uchar.of_int 0x0020) = 0);
-  assert (Uunf.ccc (Uchar.of_int 0x0301) = 230);
+  Test.int (Uunf.ccc (Uchar.of_int 0x0020)) 0 ~__POS__;
+  Test.int (Uunf.ccc (Uchar.of_int 0x0301)) 230 ~__POS__;
   ()
 
-let various_norm_tests test =
-  test [0x1E69] `NFD [0x0073; 0x0323; 0x0307];
+let various_norm_tests ?__POS__ test =
+  Test.block ?__POS__ @@ fun () ->
+  test [0x1E69] `NFD [0x0073; 0x0323; 0x0307] ;
   test [0x1E69] `NFC [0x1E69];
   test [0x1E0B; 0x0323] `NFD [0x0064; 0x0323; 0x0307];
   test [0x1E0B; 0x0323] `NFC [0x1E0D; 0x0307];
@@ -189,7 +189,7 @@ let various_norm_tests test =
   test [0xC100; 0x20D2; 0x11C1; 0x11C1] `NFC [0xC100; 0x20D2; 0x11C1; 0x11C1];
   ()
 
-let test_specific () =
+let test_specific =
   Test.test "specific normalizations" @@ fun () ->
   let test src nf dst =
     let n = Uunf.create nf in
@@ -202,9 +202,9 @@ let test_specific () =
     let dst = List.map Uchar.of_int dst in
     if nseq <> dst then Test.fail ""
   in
-  various_norm_tests test
+  various_norm_tests test ~__POS__
 
-let test_uunf_string () =
+let test_uunf_string =
   Test.test "Uunf_string" @@ fun () ->
   let test enc normalize =
     let b = Buffer.create 42 in
@@ -216,14 +216,14 @@ let test_uunf_string () =
       Buffer.reset b; loop us
     in
     let test src nf dst = assert ((normalize nf (enc src)) = (enc dst)) in
-    various_norm_tests test
+    various_norm_tests test ~__POS__
   in
   test Buffer.add_utf_8_uchar Uunf_string.normalize_utf_8;
   test Buffer.add_utf_16be_uchar Uunf_string.normalize_utf_16be;
   test Buffer.add_utf_16le_uchar Uunf_string.normalize_utf_16le;
   ()
 
-let test_flushing_end_seq () =
+let test_flushing_end_seq =
   Test.test "flushing end of stream" @@ fun () ->
   let n = Uunf.create `NFKC in
   let uchar u = `Uchar (Uchar.of_int u) in
@@ -235,35 +235,17 @@ let test_flushing_end_seq () =
   if Uunf.add n `Await <> `End then Test.fail "";
   ()
 
-let test inf =
-  Test.main @@ fun () ->
-  test_ccc ();
-  test_specific ();
-  test_uunf_string ();
-  test_flushing_end_seq ();
-  let skipped = match decode_conformance_data inf with
-  | Error e -> Test.fail "%s" e; true
-  | Ok (tests, decomps) ->
-      test_conformance_normalizations tests;
-      test_conformance_non_decomposables decomps;
-      false;
-  in
-  if skipped
-  then Test.log "\x1B[33mWarning\x1B[0m: Conformance tests skipped.\n"
-
 let main () =
-  let usage = Printf.sprintf
-    "Usage: %s [FILE]\n\
-    \ Uunf test suite. Checks the Unicode normalization conformance test \n\
-    \ by reading the test data from FILE (defaults to \
-     test/NormalizationTest.txt)\n\
-    Options:" (Filename.basename Sys.executable_name)
+  let test_data_file =
+    let default = Fpath.v "test/NormalizationTest.txt" in
+    let doc = "Unicode normalization conformance test file." in
+    Cmdliner.Arg.(value & pos 0 B0_std_cli.filepath default & info [] ~doc)
   in
-  let inf = ref None in
-  let err_inf () = raise (Arg.Bad "only one file can be specified") in
-  let set_inf f = if !inf <> None then err_inf () else inf := Some f in
-  Arg.parse [] set_inf usage;
-  let inf = Option.value ~default:"test/NormalizationTest.txt" !inf in
-  test inf
+  Test.main' test_data_file @@ fun test_data_file ->
+  match decode_conformance_data test_data_file with
+  | Error e -> Test.failstop "%s" e
+  | Ok data ->
+      let args = Test.Arg.[value conformance data] in
+      Test.autorun ~args ()
 
 let () = if !Sys.interactive then () else exit (main ())
