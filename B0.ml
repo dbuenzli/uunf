@@ -1,7 +1,7 @@
 open B0_kit.V000
 open Result.Syntax
 
-let unicode_version = 16, 0, 0, None (* Adjust on new releases *)
+let unicode_version = 17, 0, 0, None (* Adjust on new releases *)
 let next_major = B0_version.next_major unicode_version
 
 (* OCaml library names *)
