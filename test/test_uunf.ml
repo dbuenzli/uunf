@@ -241,8 +241,10 @@ let main () =
     let doc = "Unicode normalization conformance test file." in
     Cmdliner.Arg.(value & pos 0 B0_std_cli.filepath default & info [] ~doc)
   in
-  Test.main' test_data_file @@ fun test_data_file ->
-  match decode_conformance_data test_data_file with
+  Test.main' @@
+  let open Cmdliner.Term.Syntax in
+  let+ test_data_file in
+  fun () -> match decode_conformance_data test_data_file with
   | Error e -> Test.failstop "%s" e
   | Ok data ->
       let args = Test.Arg.[value conformance data] in

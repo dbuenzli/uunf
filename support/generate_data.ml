@@ -9,7 +9,7 @@ let str = Format.sprintf
 let exec = Filename.basename Sys.executable_name
 
 let ucd_or_die inf = try
-  let ic = if inf = "-" then stdin else open_in inf in
+  let ic = if inf = "-" then stdin else open_in_bin inf in
   let d = Uucd.decoder (`Channel ic) in
   match Uucd.decode d with
   | `Ok db -> db
@@ -23,7 +23,7 @@ let process inf outf =
   let ucd = (Gen.log "Loading Unicode character database.\n"; ucd_or_die inf) in
   let generate pp outf ucd =
     try
-      let oc = if outf = "-" then stdout else open_out outf in
+      let oc = if outf = "-" then stdout else open_out_bin outf in
       try
         let ppf = Format.formatter_of_out_channel oc in
         pp ppf ucd;
