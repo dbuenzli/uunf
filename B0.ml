@@ -67,7 +67,7 @@ let download_tests =
   let test_url = Fmt.str "%s/%s/ucd/NormalizationTest.txt" uc_base version in
   let test_file = B0_env.in_scope_dir env ~/"test/NormalizationTest.txt" in
   (Log.stdout @@ fun m ->
-   m "@[<v>Downloading %s@,to %a@]" test_url Fpath.pp test_file);
+   m "@[<v>Downloading %s@,to %a@]" test_url Filepath.pp test_file);
   let force = true and make_path = false in
   B0_action_kit.download_url env ~force ~make_path test_url ~dst:test_file
 
@@ -80,7 +80,7 @@ let download_ucdxml =
   let ucd_file = B0_env.in_scope_dir env ~/"support/ucd.xml" in
   Result.join @@ Os.File.with_tmp_fd @@ fun dst tmpfd ->
   (Log.stdout @@ fun m ->
-   m "@[<v>Downloading %s@,to %a@]" ucd_url Fpath.pp ucd_file);
+   m "@[<v>Downloading %s@,to %a@]" ucd_url Filepath.pp ucd_file);
   let force = true and make_path = false in
   let* () = B0_action_kit.download_url env ~force ~make_path ucd_url ~dst in
   let stdout = Os.Cmd.out_file ~force:true ~make_path:true ucd_file in

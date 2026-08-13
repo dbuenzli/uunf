@@ -29,7 +29,8 @@ let uchar_of_string v = (* parses a scalar value. *)
 let uchars_of_string v = List.map uchar_of_string (String.split_on_char ' ' v)
 
 let decode_conformance_data test_data_file =
-  Test.Log.msg "Reading test data from %a" (Fmt.code' Fpath.pp) test_data_file;
+  Test.Log.msg "Reading test data from %a"
+    (Fmt.code' Filepath.pp) test_data_file;
   let split_string sep s =
     List.filter (fun s -> s <> "") (String.split_on_char sep s)
   in
@@ -237,9 +238,9 @@ let test_flushing_end_seq =
 
 let main () =
   let test_data_file =
-    let default = Fpath.v "test/NormalizationTest.txt" in
+    let default = Filepath.v "test/NormalizationTest.txt" in
     let doc = "Unicode normalization conformance test file." in
-    Cmdliner.Arg.(value & pos 0 B0_std_cli.filepath default & info [] ~doc)
+    Cmdliner.Arg.(value & pos 0 B0_std_cli.file default & info [] ~doc)
   in
   Test.main' @@
   let open Cmdliner.Term.Syntax in
